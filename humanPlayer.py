@@ -3,27 +3,26 @@ from player import Player
 
 class HumanPlayer(Player):
 
-    def __init__(self,num):
-        super().__init__(num)
+    def __init__(self,num,boardsize):
+        super().__init__(num,boardsize)
 
     def get_move(self):
-        move=[]
-        print("tocca a te giocatore ", self.num)
+        
+        print("tocca a te, caro giocatore ", self.num)
+
         orizontalOrVertical = input("o for orizontal, any key for vertical ")
-        if orizontalOrVertical == "o":
-            move.append(True)
-        else:
-            move.append(False)
-
         row = int(input("row "))
-        move.append(row)
         col = int(input("col "))
-        move.append(col)
 
-        return move
 
+        N = self.boardsize
+        if orizontalOrVertical == "o":
+            return row*(2*N+1)+col
+        else:
+            return row*(2*N+1)+col+N
+
+    @override
     def scored(self):
         self.score += 1
+        print("bravo, hai fatto punto")
 
-    def opponentScored(self):
-        print("al momento sti cazzi, serve per segnelare la penalty al renforcement nel caso AI")
