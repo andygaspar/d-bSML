@@ -13,6 +13,7 @@ class HumanPlayer(Player):
         orizontalOrVertical = input("o for orizontal, any key for vertical ")
         row = int(input("row "))
         col = int(input("col "))
+        
 
 
         N = self.boardsize

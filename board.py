@@ -25,9 +25,7 @@ class Board:
                     if self.vectorBoard[k+N] == 1 and self.vectorBoard[k+N+1] == 1:
                         new_num_boxes+=1
                 k += 1
-            k += N+2
-
-        print(new_num_boxes)
+            k += N+1
         return new_num_boxes
 
 

@@ -7,17 +7,15 @@ from randomPlayer import RandomPlayer
 
 class Game:
 
-    def __init__(self,AIvsHuman = False, boardsize=4):
-        self.board=Board(boardsize)
-        self.numBoxes=0
-        self.players = [RandomPlayer(1,boardsize),RandomPlayer(2,boardsize)]
-
+    def __init__(self, AIvsHuman=False, boardsize=4):
+        self.board = Board(boardsize)
+        self.numBoxes = 0
+        self.players = [RandomPlayer(1, boardsize), RandomPlayer(2, boardsize)]
 
     def is_valid(self, move):
         if self.board.vectorBoard[move] == 1:
             return False
         return True
-
 
     def play(self):
 
@@ -27,12 +25,12 @@ class Game:
         currentTurn = -1
         N = self.board.size
         newNumBoxes = 0
-        while turn <  (2*N+2)*N:
-            
-            if newNumBoxes-self.numBoxes == 0:
+        while turn < (2 * N + 2) * N:
+
+            if newNumBoxes - self.numBoxes == 0:
                 currentTurn += 1
-                currentPlayer = self.players[currentTurn%2]
-                otherPlayer = self.players[(currentTurn+1)%2]
+                currentPlayer = self.players[currentTurn % 2]
+                otherPlayer = self.players[(currentTurn + 1) % 2]
             else:
                 currentPlayer.scored()
                 self.numBoxes = newNumBoxes
@@ -54,5 +52,5 @@ class Game:
         self.board.print_board()
 
 
-g=Game(False,3)
+g = Game(False, 2)
 g.play()
