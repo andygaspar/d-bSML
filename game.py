@@ -2,6 +2,7 @@ import numpy as np
 from board import Board
 from player import Player
 from humanPlayer import HumanPlayer
+from randomPlayer import RandomPlayer
 
 
 class Game:
@@ -9,7 +10,7 @@ class Game:
     def __init__(self,AIvsHuman = False, boardsize=4):
         self.board=Board(boardsize)
         self.numBoxes=0
-        self.players = [HumanPlayer(1,boardsize),HumanPlayer(2,boardsize)]
+        self.players = [RandomPlayer(1,boardsize),RandomPlayer(2,boardsize)]
 
 
     def is_valid(self, move):
@@ -25,7 +26,7 @@ class Game:
         turn = 0
         currentTurn = -1
         N = self.board.size
-        while turn <    6: # N**(N+1)*2:
+        while turn <  N**(N+1)*2:
             newNumBoxes = self.board.count_boxes()
 
             if newNumBoxes-self.numBoxes == 0:
@@ -38,16 +39,16 @@ class Game:
                 otherPlayer.opponentScored()
 
             self.board.print_board()
-            
-            move = currentPlayer.get_move()
+
+            move = currentPlayer.get_move(self.board)
 
             while not self.is_valid(move):
                 currentPlayer.invalidMove()
-                move = currentPlayer.get_move()
+                move = currentPlayer.get_move(self.board)
 
             self.board.set_board(move)
             turn += 1
-        
+
         self.board.print_board()
 
 
