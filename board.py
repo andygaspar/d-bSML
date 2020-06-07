@@ -35,55 +35,33 @@ class Board:
 
 
 
-    # methods just for printing (human conversion)
-    def convertToHumanBoard(self):
+    def print_board(self):
+
         k = 0
         N = self.size
         for i in range(N):
+            orizontal=""
+            vertical=""
             for j in range(N):
+                
                 if self.vectorBoard[k] == 0:
-                    self.rows[i,j] = 0
+                    orizontal+="  _ "
                 else:
-                    self.rows[i,j] = 1
+                    orizontal+="  * "
                 k += 1
 
             for j in range(N+1):
                 if self.vectorBoard[k] == 0:
-                    self.cols[i,j] = 0
+                    vertical+="|   "
                 else:
-                    self.cols[i,j] = 1
+                    vertical+="*   "
                 k += 1
+            print(orizontal)
+            print(vertical)
+
         for j in range(N):
             if self.vectorBoard[k] == 0:
-                self.rows[-1,j] = 0
+                orizontal+="  _ "
             else:
-                self.rows[-1,j] = 1
+                orizontal+="  * "
             k += 1
-
-
-
-    def print_board(self):
-        self.convertToHumanBoard()
-        for i in range(self.size):
-            row=""
-            col=""
-            for j in range(self.size):
-                if self.rows[i,j] == 0:
-                    row+="  _ "
-                else:
-                    row+="  * "
-            for j in range(self.size+1):
-                if self.cols[i,j] == 0:
-                    col+="|   "
-                else:
-                    col+="*   "
-            print(row)
-            print(col)
-
-        row=""
-        for j in range(self.size):
-            if self.rows[self.size,j] == 0:
-                row+="  _ "
-            else:
-                row+="  * "
-        print(row,"\n\n")
