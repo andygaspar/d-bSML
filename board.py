@@ -6,11 +6,9 @@ class Board:
         self.vectorBoard=np.zeros((2*N+2)*N)
         self.size = N
 
-
         # Human representation of the board, just for printing, in case of human player
         self.rows = np.zeros((N+1,N))
         self.cols = np.zeros((N,N+1))
-
 
 
     def set_board(self, num):
@@ -21,16 +19,16 @@ class Board:
         N = self.size
         k = 0
 
-        while k < len(self.vectorBoard)-2*N-1:
+        while k < len(self.vectorBoard)-2*N-2:
             for j in range(N):
                 if self.vectorBoard[k] == 1 and self.vectorBoard[k+2*N+1] == 1:
                     if self.vectorBoard[k+N] == 1 and self.vectorBoard[k+N+1] == 1:
                         new_num_boxes+=1
                 k += 1
             k += N+2
+
+        print(new_num_boxes)
         return new_num_boxes
-
-
 
 
     def print_board(self):
@@ -42,24 +40,26 @@ class Board:
             for j in range(N):
                 
                 if self.vectorBoard[k] == 0:
-                    orizontal+="  _ "
+                    orizontal+="  __ "
                 else:
-                    orizontal+="  * "
+                    orizontal+="  ** "
                 k += 1
 
             for j in range(N+1):
                 if self.vectorBoard[k] == 0:
-                    vertical+="|   "
+                    vertical+="|    "
                 else:
-                    vertical+="*   "
+                    vertical+="*    "
                 k += 1
             print(orizontal)
             print(vertical)
+            print(vertical)
+
         orizontal=""
         for j in range(N):
             if self.vectorBoard[k] == 0:
-                orizontal+="  _ "
+                orizontal+="  __ "
             else:
-                orizontal+="  * "
+                orizontal+="  ** "
             k += 1
         print(orizontal,"\n\n")

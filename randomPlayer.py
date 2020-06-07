@@ -5,6 +5,7 @@ class RandomPlayer(Player):
 
     def __init__(self,num,boardsize):
         super().__init__(num,boardsize)
+        np.random.seed(2)
 
     def get_move(self, board):
         validMoves = np.array([i for i in range(len(board.vectorBoard)) if board.vectorBoard[i]==0])

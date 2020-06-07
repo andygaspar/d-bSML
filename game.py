@@ -26,16 +26,16 @@ class Game:
         turn = 0
         currentTurn = -1
         N = self.board.size
+        newNumBoxes = 0
         while turn <  (2*N+2)*N:
-            newNumBoxes = self.board.count_boxes()
-
+            
             if newNumBoxes-self.numBoxes == 0:
                 currentTurn += 1
                 currentPlayer = self.players[currentTurn%2]
                 otherPlayer = self.players[(currentTurn+1)%2]
             else:
                 currentPlayer.scored()
-                self.boxes = newNumBoxes
+                self.numBoxes = newNumBoxes
                 otherPlayer.opponentScored()
 
             self.board.print_board()
@@ -48,6 +48,8 @@ class Game:
 
             self.board.set_board(move)
             turn += 1
+
+            newNumBoxes = self.board.count_boxes()
 
         self.board.print_board()
 
