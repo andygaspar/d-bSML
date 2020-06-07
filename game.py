@@ -48,7 +48,7 @@ class Game:
 
             self.board.set_board(move)
             turn += 1
-
+            
         self.board.print_board()
 
 
