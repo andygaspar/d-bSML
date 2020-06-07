@@ -26,7 +26,7 @@ class Game:
         turn = 0
         currentTurn = -1
         N = self.board.size
-        while turn <  N**(N+1)*2:
+        while turn <  (2*N+2)*N:
             newNumBoxes = self.board.count_boxes()
 
             if newNumBoxes-self.numBoxes == 0:
