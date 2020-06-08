@@ -1,12 +1,13 @@
-import numpy as nu
+import numpy as np
 from player import Player
+from board import Board
 
 class HumanPlayer(Player):
 
-    def __init__(self,num,boardsize):
-        super().__init__(num,boardsize)
+    def __init__(self, num: int, boardsize: int):
+        super().__init__(num, boardsize)
 
-    def get_move(self, board):
+    def get_move(self, board: Board) -> int:
 
         print("tocca a te, caro giocatore ", self.num)
 
@@ -15,13 +16,11 @@ class HumanPlayer(Player):
         col = int(input("col "))
         
 
-
         N = self.boardsize
         if orizontalOrVertical == "o":
-            return row*(2*N+1)+col
+            return row * (2 * N + 1) + col
         else:
-            return row*(2*N+1)+col+N
-
+            return row * (2 * N + 1) + col + N
 
     def scored(self):
         self.score += 1

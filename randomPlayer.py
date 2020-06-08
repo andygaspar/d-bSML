@@ -1,14 +1,15 @@
 import numpy as np
 from player import Player
+from board import Board
 
 class RandomPlayer(Player):
 
-    def __init__(self,num,boardsize):
-        super().__init__(num,boardsize)
+    def __init__(self, num: int, boardsize: int):
+        super().__init__(num, boardsize)
         np.random.seed(2)
 
-    def get_move(self, board):
-        validMoves = np.array([i for i in range(len(board.vectorBoard)) if board.vectorBoard[i]==0])
+    def get_move(self, board: Board) -> int:
+        validMoves = np.flatnonzero(board.vectorBoard == 0)
         return np.random.choice(validMoves)
 
     def scored(self):

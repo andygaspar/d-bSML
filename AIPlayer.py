@@ -1,4 +1,3 @@
-import numpy as np
 from player import Player
 
 import matplotlib.pyplot as plt
@@ -7,16 +6,14 @@ import numpy as np
 import torch
 from torch import nn, optim
 from IPython import display
-from utils.visual import set_default, plot_data, plot_model
-set_default()
 
 class RandomPlayer(Player):
 
-    def __init__(self,num,boardsize):
-        super().__init__(num,boardsize)
-        np.random.seed(2)
+	def __init__(self,num,boardsize):
+		super().__init__(num,boardsize)
+		np.random.seed(2)
 
-    def get_move(self, board):
+	def get_move(self, board):
 		# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 		# print('Device: {}'.format(device))
 		torch.manual_seed(41)
@@ -27,29 +24,29 @@ class RandomPlayer(Player):
 		epochs = 1000
 
 		X = torch.zeros(N, D)
-		y = torch.zeros(N, dtype = torch.long)
+		y = torch.zeros(N, dtype=torch.long)
 
 		model = nn.Sequential(
-            nn.Linear(D, H),
-            nn.ReLU(),
-            nn.Linear(H, N))
+			nn.Linear(D, H),
+			nn.ReLU(),
+			nn.Linear(H, N))
 		#model.to(device)
-		criterion = Variable(torch.zeros(1), requires_grad=True)
+		criterion = torch.autograd.Variable(torch.zeros(1), requires_grad=True)
 		optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
 
 		for e in range(epochs):
-		    y_pred = model(X)
-		    loss = criterion
-		    print("[EPOCH]: {}, [LOSS]: {}".format(e, loss.item()))
-    		display.clear_output(wait=True)
-    
-    		optimizer.zero_grad()
-    		loss.backward()
-		    optimizer.step()
-        
-		validMoves = np.array([i for i in range(len(board.vectorBoard)) if board.vectorBoard[i]==0])
-        return np.random.choice(validMoves)
+			y_pred = model(X)
+			loss = criterion
+			print("[EPOCH]: {}, [LOSS]: {}".format(e, loss.item()))
+			display.clear_output(wait=True)
 
-    def scored(self):
-        self.score += 1
-        print("bravo, hai fatto punto")
+			optimizer.zero_grad()
+			loss.backward()
+			optimizer.step()
+
+		validMoves = np.flatnonzero(board.vectorBoard == 0)
+		return np.random.choice(validMoves)
+
+	def scored(self):
+		self.score += 1
+		print("bravo, hai fatto punto")
