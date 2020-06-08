@@ -1,11 +1,13 @@
 import numpy as np
 
 class Player:
+    id: int  # player identifier
+    score: int  # player score
+    boardsize: int  # grid size
 
-    def __init__(self, num, boardsize):
-        self.num = num
+    def __init__(self, id: int, boardsize: int):
+        self.id = id
         self.score = 0
-
         self.boardsize = boardsize
 
     def scored(self):
@@ -16,3 +18,4 @@ class Player:
 
     def invalidMove(self):
         print("sempre sti cazzi, da dire alla AI che non sa ancora giocare, che si vergogni")
+        raise Exception()

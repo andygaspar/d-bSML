@@ -4,12 +4,12 @@ from board import Board
 
 class HumanPlayer(Player):
 
-    def __init__(self, num: int, boardsize: int):
-        super().__init__(num, boardsize)
+    def __init__(self, id: int, boardsize: int):
+        super().__init_(id, boardsize)
 
     def get_move(self, board: Board) -> int:
 
-        print("tocca a te, caro giocatore ", self.num)
+        print("tocca a te, caro giocatore ", self.id)
 
         orizontalOrVertical = input("o for orizontal, any key for vertical ")
         row = int(input("row "))

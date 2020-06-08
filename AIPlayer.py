@@ -9,8 +9,8 @@ from IPython import display
 
 class RandomPlayer(Player):
 
-	def __init__(self,num,boardsize):
-		super().__init__(num,boardsize)
+	def __init__(self, id: int, boardsize: int):
+		super().__init__(id, boardsize)
 		np.random.seed(2)
 
 	def get_move(self, board):
