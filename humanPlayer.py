@@ -1,27 +1,47 @@
-import numpy as np
+import sys
+print_err = sys.stderr.write
 from player import Player
 from board import Board
+
 
 class HumanPlayer(Player):
 
     def __init__(self, id: int, boardsize: int):
-        super().__init_(id, boardsize)
+        super().__init__(id, boardsize)
 
     def get_move(self, board: Board) -> int:
 
         print("tocca a te, caro giocatore ", self.id)
 
-        orizontalOrVertical = input("o for orizontal, any key for vertical ")
-        row = int(input("row "))
-        col = int(input("col "))
-        
-
         N = self.boardsize
-        if orizontalOrVertical == "o":
-            return row * (2 * N + 1) + col
-        else:
-            return row * (2 * N + 1) + col + N
+
+        while True:
+            orizontal = (input("o for orizontal, any key for vertical ") == "o")
+            row = int(input("row idx, start from 0: "))
+            col = int(input("col idx, start from 0:"))
+            if orizontal:
+                vec_idx = row * (2 * N + 1) + col
+                if (row in range(0, N + 1)) and (col in range(0, N)):
+                    if board.vectorBoard[vec_idx] == 0: return vec_idx
+                    else: print_err("Move already chosen, please try again\n")
+                else: print_err("Invalid Move, please try again\n")
+            else:
+                vec_idx = row * (2 * N + 1) + col + N
+                if (row in range(0, N)) and (col in range(0, N + 1)):
+                    if board.vectorBoard[vec_idx] == 0: return vec_idx
+                    else: print_err("Move already chosen, please try again\n")
+                else: print_err("Invalid move, try again\n")
 
     def scored(self):
         self.score += 1
         print("bravo, hai fatto punto")
+
+
+#boardsize = 3
+#testPlayer = HumanPlayer(1, boardsize)
+#testBoard = Board(boardsize)
+
+#for i in range(5):
+#    testBoard.print_board()
+#    move = testPlayer.get_move(testBoard)
+#    testBoard.set_board(move)
