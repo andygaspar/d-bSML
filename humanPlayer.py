@@ -32,16 +32,6 @@ class HumanPlayer(Player):
                     else: print_err("Move already chosen, please try again\n")
                 else: print_err("Invalid move, try again\n")
 
-    def scored(self):
-        self.score += 1
+    def scored(self, newPoints: int):
+        self.score += newPoints
         print("bravo, hai fatto punto")
-
-
-#boardsize = 3
-#testPlayer = HumanPlayer(1, boardsize)
-#testBoard = Board(boardsize)
-
-#for i in range(5):
-#    testBoard.print_board()
-#    move = testPlayer.get_move(testBoard)
-#    testBoard.set_board(move)

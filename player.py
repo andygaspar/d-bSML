@@ -10,8 +10,8 @@ class Player:
         self.score = 0
         self.boardsize = boardsize
 
-    def scored(self):
-        self.score += 1
+    def scored(self, newPoints: int):
+        self.score += newPoints
 
     def opponentScored(self):
         print("al momento sti cazzi, serve per segnelare la penalty al renforcement nel caso AI")
