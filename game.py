@@ -19,8 +19,8 @@ class Game:
 
     def play(self):
 
-        currentPlayer = None
-        otherPlayer = None
+        currentPlayer = self.players[0]
+        otherPlayer = self.players[1]
         turn = 0
         PlayerTurn = -1
         N = self.board.size
@@ -29,15 +29,6 @@ class Game:
         self.board.print_board()
 
         while turn < (2 * N + 2) * N:
-            if newNumBoxes - self.numBoxes == 0:
-                PlayerTurn += 1
-                currentPlayer = self.players[PlayerTurn % 2]
-                otherPlayer = self.players[(PlayerTurn + 1) % 2]
-            else:
-                currentPlayer.scored(newNumBoxes-self.numBoxes)
-                self.numBoxes = newNumBoxes
-                otherPlayer.opponentScored()
-
 
             move = currentPlayer.get_move(self.board)
 
@@ -51,6 +42,16 @@ class Game:
 
             newNumBoxes = self.board.count_boxes()
             print(newNumBoxes)
+
+            if newNumBoxes - self.numBoxes == 0:
+                PlayerTurn += 1
+                currentPlayer = self.players[PlayerTurn % 2]
+                otherPlayer = self.players[(PlayerTurn + 1) % 2]
+            else:
+                currentPlayer.scored(newNumBoxes-self.numBoxes)
+                self.numBoxes = newNumBoxes
+                otherPlayer.opponentScored()
+
             self.board.print_board()
 
         print("Players score: " + str([p.score for p in self.players]))
