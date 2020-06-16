@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Player:
     id: int  # player identifier
     score: int  # player score

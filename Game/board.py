@@ -1,7 +1,7 @@
 import numpy as np
 
-class Board:
 
+class Board:
     vectorBoard: np.ndarray
     rows: int
     cols: int

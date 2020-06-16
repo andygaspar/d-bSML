@@ -1,13 +1,13 @@
 import numpy as np
-from player import Player
-from board import Board
+from Players.player import Player
+from Game.board import Board
 
 
 class RandomPlayer(Player):
 
     def __init__(self, id: int, boardsize: int):
         super().__init__(id, boardsize)
-        #np.random.seed(2)
+        # np.random.seed(2)
 
     def get_move(self, board: Board) -> int:
         validMoves = np.flatnonzero(board.vectorBoard == 0)
