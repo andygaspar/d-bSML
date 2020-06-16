@@ -1,11 +1,11 @@
 from Game.board import Board
 from Players.player import Player
 from GameTraining.Gym.replayMemory import ReplayMemory
-from GameTraining.Gym import network
+from GameTraining.Gym.network import Network
 import numpy as np
 
 
-class AIPlayer(Player):
+class AITrainer(Player):
     state: Board
     nextState: Board
     action: int
@@ -14,10 +14,9 @@ class AIPlayer(Player):
     rewardInvalidMove: float
     replayBuffer: list  # of Record
     score: int
-    network: network
 
-    def __init__(self, id_number: int, boardsize: int, rewardScored: float = 10,
-                 rewardOpponentScored: float = -10, rewardInvalidMove: float = -100):
+    def __init__(self, id_number: int, boardsize: int, hidden: int, epochs: int, rewardScored: float,
+                 rewardOpponentScored: float, rewardInvalidMove: float):
         super().__init__(id_number, boardsize)
         self.rewardInvalidMove = rewardInvalidMove
         self.rewardScored = rewardScored
@@ -26,7 +25,8 @@ class AIPlayer(Player):
         self.state = None
         self.nextState = None
         self.invalid = False
-        self.network = network(boardsize, rewardScored, rewardOpponentScored, rewardInvalidMove)
+        self.network = Network(boardsize, hidden, epochs)
+        self.replayMemory = ReplayMemory()
 
     def get_move(self, state) -> int:
 
@@ -40,20 +40,17 @@ class AIPlayer(Player):
             self.action = np.random.choice(validMoves)
             return self.action
 
-    def update(self, record: ReplayMemory):
-        self.replayBuffer.append(record)
-
     def scored(self, newPoints: int):
         self.score += newPoints
-        self.update(ReplayMemory(self.state, self.action, self.nextState, self.rewardScored))
+        self.replayMemory.add_record(self.state, self.action, self.nextState, self.rewardScored)
         print("bravo, hai fatto punto")
 
     def opponentScored(self):
-        self.update(ReplayMemory(self.state, self.action, self.nextState, self.rewardOpponentScored))
+        self.replayMemory.add_record(self.state, self.action, self.nextState, self.rewardOpponentScored)
 
     def invalidMove(self):
         self.invalid = True
-        self.update(ReplayMemory(self.state, self.action, self.nextState, self.rewardInvalidMove))
+        self.replayMemory.add_record(self.state, self.action, self.nextState, self.rewardInvalidMove)
 
-    def updateWeights(self):
-        pass
+    def train_network(self):
+        self.network.update_weights(self.replayMemory.get_sample())
