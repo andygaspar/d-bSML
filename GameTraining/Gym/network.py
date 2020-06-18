@@ -70,22 +70,34 @@ class NetworkOnlyValid(Network):
         states, actions, nextStates, rewards = batch
         X = torch.tensor([el.tolist() for el in states]).reshape(len(states), self.inputDimension)
         X_next = torch.tensor([el.tolist() for el in nextStates]).reshape(len(nextStates), self.inputDimension)
+
+        actions = torch.tensor(actions)
+        rewards = torch.tensor(rewards)
         for e in range(self.epochs):
-            q_current_matrix = self.network(X)
-            q_actions_done = torch.tensor([row[action] for row, action in zip(q_current_matrix, actions)], requires_grad=True)
+            #q_current_matrix = self.network(X)
+            #q_actions_done = torch.tensor([row[action] for row, action in zip(q_current_matrix, actions)], requires_grad=True)
 
-            q_target_matrix = self.network(X_next)
-            valid_qvalues_matrix = [q_target_matrix[i][self.get_action(state)] for i, state in enumerate(nextStates)]
+            #q_target_matrix = self.network(X_next)
+            #valid_qvalues_matrix = [q_target_matrix[i][self.get_action(state)] for i, state in enumerate(nextStates)]
 
-            # q_target_matrix = self.network(X_next)
-            # valid_states = int(not nextStates)
-            # q_target_valid = q_target_matrix[valid_states]
+            #q_target_matrix = self.network(X_next)
+            #valid_states = int(not nextStates)
+            #q_target_valid = q_target_matrix[valid_states]
 
-            q_target_max = torch.tensor([torch.max(row) for row in valid_qvalues_matrix])
-            loss = criterion(q_actions_done, torch.tensor(rewards) + gamma * q_target_max)
+            #q_target_max = torch.tensor([torch.max(row) for row in valid_qvalues_matrix], requires_grad=True)
+            #loss = criterion(q_actions_done, torch.tensor(rewards) + gamma * q_target_max)
+
+            curr_Q = self.network(X).gather(1, actions.unsqueeze(1))
+            curr_Q = curr_Q.squeeze(1)
+            next_Q = self.network(X_next)
+            max_next_Q = torch.max(next_Q, 1)[0]
+            expected_Q = rewards + gamma * max_next_Q
+
+            loss = criterion(curr_Q, expected_Q.detach())
+
             if e % 100 == 0: print("[EPOCH]: {}, [LOSS]: {}".format(e, loss.item()))
             display.clear_output(wait=True)
-
+            #print(self.network.state_dict())
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

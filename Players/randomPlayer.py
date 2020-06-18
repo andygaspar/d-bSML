@@ -15,7 +15,7 @@ class RandomPlayer(Player):
 
     def scored(self, newPoints: int):
         self.score += newPoints
-        print("bravo, hai fatto punto")
+        #print("bravo, hai fatto punto")
 
     def __str__(self):
         return "Random player"

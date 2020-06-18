@@ -25,10 +25,9 @@ players = [RandomPlayer(1, boardsize), AITrainer(2, boardsize, HIDDEN, EPOCHS, R
 game = GameTraining(players, boardsize)
 
 batch = []
-for i in range(200):
+for i in range(5000):
     game.play()
     game.reset()
-    if i % 20 == 0:
+    if i % 100 == 0:
         players[1].train_network()
 
-print(players[1].replayMemory.rewards)
