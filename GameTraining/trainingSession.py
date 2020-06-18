@@ -5,12 +5,12 @@ from Players.randomPlayer import RandomPlayer
 from time import time
 
 CAPACITY = 30_000
-SAMPLE_SIZE = 500
+SAMPLE_SIZE = 2000
 HIDDEN = 100
 EPOCHS = 1000
 GAMMA = 0.9
 
-REWARD_NO_SCORE:float = 0
+REWARD_NO_SCORE:float = 1
 REWARD_SCORE: float = 10
 REWARD_OPPONENT_SCORE: float = -10
 REWARD_INVALID_SCORE: float = -1000
@@ -28,8 +28,8 @@ game = GameTraining(players, boardsize)
 
 batch = []
 t = time()
-for i in range(10):
-    game.play(train = False)
+for i in range(2000):
+    game.play(train=False)
     game.reset()
 
 print(time()-t, " go finio de zogar")
