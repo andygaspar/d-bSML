@@ -45,15 +45,13 @@ class AIPlayer(Player):
 
     def scored(self, newPoints: int):
         self.score += newPoints
-        self.update(ReplayMemory(self.state, self.action, self.nextState, self.rewardScored))
-        print("bravo, hai fatto punto")
 
-    def opponentScored(self):
-        self.update(ReplayMemory(self.state, self.action, self.nextState, self.rewardOpponentScored))
+    def opponentScored(self, newPoints: int):
+        pass
 
     def invalidMove(self):
         self.invalid = True
-        self.update(ReplayMemory(self.state, self.action, self.nextState, self.rewardInvalidMove))
 
-    def updateWeights(self):
-        pass
+    def __str__(self):
+        return "AI player"
+

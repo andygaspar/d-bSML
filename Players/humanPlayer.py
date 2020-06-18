@@ -1,6 +1,6 @@
 import sys
 from Players.player import Player
-from Game.board import Board
+import numpy as np
 print_err = sys.stderr.write
 
 
@@ -9,7 +9,7 @@ class HumanPlayer(Player):
     def __init__(self, id: int, boardsize: int):
         super().__init__(id, boardsize)
 
-    def get_move(self, board: Board) -> int:
+    def get_move(self, board: np.array) -> int:
 
         print("tocca a te, caro giocatore ", self.id)
 
@@ -22,7 +22,7 @@ class HumanPlayer(Player):
             if orizontal:
                 vec_idx = row * (2 * N + 1) + col
                 if (row in range(0, N + 1)) and (col in range(0, N)):
-                    if board.vectorBoard[vec_idx] == 0:
+                    if board[vec_idx] == 0:
                         return vec_idx
                     else:
                         print_err("Move already chosen, please try again\n")
@@ -31,7 +31,7 @@ class HumanPlayer(Player):
             else:
                 vec_idx = row * (2 * N + 1) + col + N
                 if (row in range(0, N)) and (col in range(0, N + 1)):
-                    if board.vectorBoard[vec_idx] == 0:
+                    if board[vec_idx] == 0:
                         return vec_idx
                     else:
                         print_err("Move already chosen, please try again\n")
@@ -41,3 +41,10 @@ class HumanPlayer(Player):
     def scored(self, newPoints: int):
         self.score += newPoints
         print("bravo, hai fatto punto")
+
+    def __str__(self):
+        return "Human player"
+
+    def invalidMove(self):
+        print("sempre sti cazzi, da dire alla AI che non sa ancora giocare, che si vergogni")
+        raise Exception()

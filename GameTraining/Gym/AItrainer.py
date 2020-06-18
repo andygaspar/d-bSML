@@ -1,56 +1,76 @@
 from Game.board import Board
 from Players.player import Player
 from GameTraining.Gym.replayMemory import ReplayMemory
-from GameTraining.Gym.network import Network
+from GameTraining.Gym.network import Network, NetworkOnlyValid
 import numpy as np
+from GameTraining.Gym.replayMemory import ReplayMemory
 
 
 class AITrainer(Player):
-    state: Board
-    nextState: Board
+    state: np.array
     action: int
+    rewardNoScore: float
     rewardScored: float
     rewardOpponentScored: float
     rewardInvalidMove: float
-    replayBuffer: list  # of Record
     score: int
+    replayMemory: ReplayMemory
+    current_reward: int
+    gamma: float
 
-    def __init__(self, id_number: int, boardsize: int, hidden: int, epochs: int, rewardScored: float,
-                 rewardOpponentScored: float, rewardInvalidMove: float):
+    def __init__(self, id_number: int, boardsize: int, hidden: int, epochs: int,
+                 rewardNoScore: float, rewardScored: float, rewardOpponentScored: float, rewardInvalidMove: float,
+                 use_invalid: bool, sample_size: int, capacity: int, gamma: float):
+
         super().__init__(id_number, boardsize)
+        self.rewardNoScore = rewardNoScore
         self.rewardInvalidMove = rewardInvalidMove
         self.rewardScored = rewardScored
         self.rewardOpponentScored = rewardOpponentScored
-        self.replayBuffer = []
         self.state = None
-        self.nextState = None
+        self.action = None
         self.invalid = False
-        self.network = Network(boardsize, hidden, epochs)
-        self.replayMemory = ReplayMemory()
+        self.network = Network(boardsize, hidden, epochs) \
+            if use_invalid == True else NetworkOnlyValid(boardsize, hidden, epochs)
+        self.replayMemory = ReplayMemory(sample_size, capacity)
+        self.current_reward = 0
+        self.gamma = gamma
 
-    def get_move(self, state) -> int:
+    def get_move(self, state: np.array) -> int:
+        self.state = state.copy()
 
         if not self.invalid:
-            self.state = state
-            return self.network.get_action(state)
-
+            self.action = self.network.get_action(state)
+            return self.action
         else:
             self.invalid = False
-            validMoves = np.flatnonzero(state.vectorBoard == 0)
+            validMoves = np.flatnonzero(state == 0)
             self.action = np.random.choice(validMoves)
             return self.action
 
+    def no_score_move(self):
+        self.current_reward += self.rewardNoScore
+
     def scored(self, newPoints: int):
         self.score += newPoints
-        self.replayMemory.add_record(self.state, self.action, self.nextState, self.rewardScored)
-        print("bravo, hai fatto punto")
+        self.current_reward += self.rewardScored
 
-    def opponentScored(self):
-        self.replayMemory.add_record(self.state, self.action, self.nextState, self.rewardOpponentScored)
+    def opponentScored(self, newPoints: int):
+        self.score += newPoints
+        self.current_reward += self.rewardOpponentScored
 
     def invalidMove(self):
         self.invalid = True
-        self.replayMemory.add_record(self.state, self.action, self.nextState, self.rewardInvalidMove)
+        self.current_reward += self.rewardInvalidMove
+
+    def add_record(self, nextState: np.array):
+        self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward)
+        self.current_reward = 0
 
     def train_network(self):
-        self.network.update_weights(self.replayMemory.get_sample())
+        if self.replayMemory.size < self.replayMemory.sampleSize:
+            return
+        self.network.update_weights(self.replayMemory.get_sample(), self.gamma)
+
+    def __str__(self):
+        return "AI trainer player"

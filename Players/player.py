@@ -1,4 +1,7 @@
 import numpy as np
+import abc
+
+from Game.board import Board
 
 
 class Player:
@@ -11,12 +14,21 @@ class Player:
         self.score = 0
         self.boardsize = boardsize
 
-    def scored(self, newPoints: int):
-        self.score += newPoints
+    @abc.abstractmethod
+    def get_move(self, state: np.array):
+        pass
 
-    def opponentScored(self):
-        print("al momento sti cazzi, serve per segnelare la penalty al renforcement nel caso AI")
+    def no_score_move(self):
+        pass
+
+    def scored(self, newPoints: int):
+        pass
+
+    def opponentScored(self, newPoints: int):
+        pass
 
     def invalidMove(self):
-        print("sempre sti cazzi, da dire alla AI che non sa ancora giocare, che si vergogni")
-        raise Exception()
+        pass
+
+    def add_record(self, next_game_state: np.array):
+        pass

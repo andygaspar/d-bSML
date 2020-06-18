@@ -1,13 +1,14 @@
+from typing import List
+
 from Game.board import Board
 from Players.player import Player
-from Players.randomPlayer import RandomPlayer
-from GameTraining.Gym.AItrainer import AITrainer
 
 
 class GameTraining:
 
-    def __init__(self, players: list[Player],boardsize: int = 4):
-        self.board = Board(boardsize)
+    def __init__(self, players: List[Player], boardsize: int = 4):
+        self.boardsize = boardsize
+        self.board = Board(self.boardsize)
         self.numBoxes = 0
         self.players = players
 
@@ -23,32 +24,40 @@ class GameTraining:
         N = self.board.size
         newNumBoxes = 0
 
-        self.board.print_board()
+        #self.board.print_board()
 
         while turn < (2 * N + 2) * N:
 
-            move = currentPlayer.get_move(self.board)
+            action = currentPlayer.get_move(self.board.vectorBoard)
 
-            while not self.is_valid(move):
+            while not self.is_valid(action):
                 currentPlayer.invalidMove()
-                move = currentPlayer.get_move(self.board)
-                # print("Invalid Move")
+                action = currentPlayer.get_move(self.board.vectorBoard)
 
-            self.board.set_board(move)
-            turn += 1
+            self.board.set_board(action)
 
             newNumBoxes = self.board.count_boxes()
-            # print(newNumBoxes)
 
             if newNumBoxes - self.numBoxes == 0:
+                if turn > 0:
+                    currentPlayer.no_score_move()
+                    otherPlayer.add_record(self.board.vectorBoard)
+
                 PlayerTurn += 1
                 currentPlayer = self.players[PlayerTurn % 2]
                 otherPlayer = self.players[(PlayerTurn + 1) % 2]
             else:
                 currentPlayer.scored(newNumBoxes - self.numBoxes)
                 self.numBoxes = newNumBoxes
-                otherPlayer.opponentScored()
+                otherPlayer.opponentScored(newNumBoxes - self.numBoxes)
 
-            self.board.print_board()
+            turn += 1
+            #self.board.print_board()
+            #print("Score: " + str([str(p)+" "+str(p.score) for p in self.players]))
 
-        # print("Players score: " + str([p.score for p in self.players]))
+    def reset(self):
+        self.board = Board(self.boardsize)
+        self.numBoxes = 0
+        for player in self.players:
+            player.score = 0
+

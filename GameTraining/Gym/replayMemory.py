@@ -4,17 +4,17 @@ from Game.board import Board
 import numpy as np
 
 
-
-
 class ReplayMemory:
-    states: List[Board]
+    size: int
+    states: List[np.array]
     actions: List[int]
-    nextStates: List[Board]
+    nextStates: List[np.array]
     rewards: List[float]
     sampleSize: int
     capacity: int
 
     def __init__(self, sample_size: int, capacity: int):
+        self.size = 0
         self.states = []
         self.actions = []
         self.nextStates = []
@@ -22,17 +22,20 @@ class ReplayMemory:
         self.sampleSize = sample_size
         self.capacity = capacity
 
-    def add_record(self, state: Board, action: int, nextState: Board, reward: float):
+    def add_record(self, state: np.array, action: int, nextState: np.array, reward: float):
         if len(self.actions) >= self.capacity:
             self.states = self.states[1:]
             self.actions = self.actions[1:]
             self.nextStates = self.nextStates[1:]
             self.rewards = self.rewards[1:]
+            self.size -= 1
         self.states.append(state)
         self.actions.append(action)
         self.nextStates.append(nextState)
         self.rewards.append(reward)
+        self.size += 1
 
     def get_sample(self):
-        random_idx = np.random.sample(self.sampleSize, range(len(self.actions)))
-        return self.states[random_idx], self.actions[random_idx], self.nextStates[random_idx], self.rewards[random_idx]
+        random_idx = np.random.choice(range(self.size), self.sampleSize).astype(int)
+        return [self.states[i] for i in random_idx], [self.actions[i] for i in random_idx], \
+               [self.nextStates[i] for i in random_idx], [self.rewards[i] for i in random_idx]
