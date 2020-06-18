@@ -2,8 +2,10 @@ from GameTraining.Gym.AItrainer import AITrainer
 from GameTraining.gameTraining import GameTraining
 from Players.randomPlayer import RandomPlayer
 
+from time import time
+
 CAPACITY = 30_000
-SAMPLE_SIZE = 20
+SAMPLE_SIZE = 500
 HIDDEN = 100
 EPOCHS = 1000
 GAMMA = 0.9
@@ -25,9 +27,15 @@ players = [RandomPlayer(1, boardsize), AITrainer(2, boardsize, HIDDEN, EPOCHS, R
 game = GameTraining(players, boardsize)
 
 batch = []
-for i in range(5000):
-    game.play()
+t = time()
+for i in range(10):
+    game.play(train = False)
     game.reset()
-    if i % 100 == 0:
-        players[1].train_network()
+
+print(time()-t, " go finio de zogar")
+
+for i in range(200):
+    game.play(train=True)
+    game.reset()
+
 

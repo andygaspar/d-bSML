@@ -63,8 +63,10 @@ class AITrainer(Player):
         self.invalid = True
         self.current_reward += self.rewardInvalidMove
 
-    def add_record(self, nextState: np.array):
+    def add_record(self, nextState: np.array, train: bool):
         self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward)
+        if train:
+            self.train_network()
         self.current_reward = 0
 
     def train_network(self):

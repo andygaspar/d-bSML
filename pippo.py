@@ -53,12 +53,23 @@ criterion = nn.CrossEntropyLoss()
 
 optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=lambdaL2)
 
-for e in range(epochs):
-    y_pred = model(X)
-    loss = criterion(y_pred, y)
-    print("[EPOCH]: {}, [LOSS]: {}".format(e, loss.item()))
-    display.clear_output(wait=True)
+# for e in range(epochs):
+#     y_pred = model(X)
+#     loss = criterion(y_pred, y)
+#     print("[EPOCH]: {}, [LOSS]: {}".format(e, loss.item()))
+#     display.clear_output(wait=True)
+#
+#     optimizer.zero_grad()
+#     loss.backward()
+#     optimizer.step()
 
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+t = torch.tensor([[1,2],[3,4]])
+print(t)
+print(torch.gather(t, 1, torch.tensor([[0,0],[1,0]])))
+print(torch.gather(t, 1, torch.tensor([[0,0],[0,0]])))
+print(torch.gather(t, 1, torch.tensor([[0,1],[0,1]])))
+print(torch.gather(t, 1, torch.tensor([[1,0],[1,0]])))
+# print(torch.gather(t, 1, torch.tensor([[1,0],[1,0]])))
+
+t = torch.tensor([1,2,3,4])
+print(torch.gather(t,0,torch.tensor([0, 0, 1, 0])))

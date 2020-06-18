@@ -15,7 +15,7 @@ class GameTraining:
     def is_valid(self, idx: int) -> bool:
         return not self.board.vectorBoard[idx]  # (1==True gives False, 0 == False gives True)
 
-    def play(self):
+    def play(self, train):
 
         currentPlayer = self.players[0]
         otherPlayer = self.players[1]
@@ -41,7 +41,7 @@ class GameTraining:
             if newNumBoxes - self.numBoxes == 0:
                 if turn > 0:
                     currentPlayer.no_score_move()
-                    otherPlayer.add_record(self.board.vectorBoard)
+                    otherPlayer.add_record(self.board.vectorBoard, train)
 
                 PlayerTurn += 1
                 currentPlayer = self.players[PlayerTurn % 2]

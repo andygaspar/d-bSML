@@ -86,6 +86,9 @@ class NetworkOnlyValid(Network):
 
             #q_target_max = torch.tensor([torch.max(row) for row in valid_qvalues_matrix], requires_grad=True)
             #loss = criterion(q_actions_done, torch.tensor(rewards) + gamma * q_target_max)
+            #policy_net(states).gather(dim=1, index=actions.unsqueeze(-1))
+            print(actions.shape)
+            print(actions.unsqueeze(1).shape)
 
             curr_Q = self.network(X).gather(1, actions.unsqueeze(1))
             curr_Q = curr_Q.squeeze(1)

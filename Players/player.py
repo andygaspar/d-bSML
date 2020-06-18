@@ -30,5 +30,5 @@ class Player:
     def invalidMove(self):
         pass
 
-    def add_record(self, next_game_state: np.array):
+    def add_record(self, next_game_state: np.array, train: bool):
         pass
