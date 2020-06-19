@@ -70,8 +70,8 @@ class NetworkOnlyValid(Network):
 
     def update_weights(self, batch: tuple, gamma: float):
         criterion = torch.nn.MSELoss()
-        #optimizer = optim.Adam(self.network.parameters(), lr=1e-2, weight_decay=1e-3)
-        optimizer = optim.SGD(self.network.parameters(), lr=1e-3, momentum=0.9)
+        optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
+        #optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
 
         states, actions, nextStates, rewards = batch
         X = torch.tensor([el.tolist() for el in states]).reshape(len(states), self.inputDimension) / len(states[0])
