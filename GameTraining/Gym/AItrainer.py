@@ -27,6 +27,7 @@ class AITrainer(Player):
         self.rewardInvalidMove = rewardInvalidMove
         self.rewardScored = rewardScored
         self.rewardOpponentScored = rewardOpponentScored
+        self.rewardScoresInRow = 0
         self.state = None
         self.action = None
         self.invalid = False
@@ -50,16 +51,19 @@ class AITrainer(Player):
             return self.action
 
     def no_score_move(self):
-        self.current_reward += self.rewardNoScore * 0.5
+        self.rewardScoresInRow = 0
+        self.current_reward += self.rewardNoScore
 
     def scored(self, newPoints: int):
         self.score += newPoints
-        #self.score += newPoints + newPoints ** 0.5
-        self.current_reward += self.rewardScored
+        self.current_reward += newPoints*self.rewardScored + self.rewardScoresInRow*self.rewardScored
+        if newPoints > 1:
+            self.current_reward += newPoints * self.rewardScored
+        self.rewardScoresInRow += 1
 
     def opponentScored(self, newPoints: int):
         self.score += newPoints
-        #self.score += newPoints / 2 + (newPoints / 2) ** 0.5
+        self.current_reward += (newPoints*self.rewardOpponentScored + self.rewardScoresInRow*self.rewardOpponentScored)/2
         self.current_reward += self.rewardOpponentScored
 
     def invalidMove(self):
@@ -68,9 +72,9 @@ class AITrainer(Player):
 
     def endGameReward(self, win: bool):
         if win:
-            self.current_reward = 20
+            self.current_reward = 100
         else:
-            self.current_reward = -20
+            self.current_reward = -100
 
     def add_record(self, nextState: np.array, train: bool):
         if self.limitedBatch:
