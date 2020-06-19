@@ -50,5 +50,5 @@ for i in range(20):
     training_cycle(game, 1_000)
     #random_experience(game, 1_000, get_wins=True)
 
-    print("iteration ", i, "   time: ", (time() - t) / 60)
+    print("iteration ", i, "   time: ", str(int((time() - t) / 60))+str(int(((time() - t) % 60)*60)))
 

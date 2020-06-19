@@ -21,7 +21,7 @@ class Network:
 
 
     def get_action(self, state: Board) -> int:
-        X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32)
+        X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state.vectorBoard)
         Q_values = self.network(X)
         return torch.argmax(torch.flatten(Q_values)).item()
 
@@ -30,9 +30,9 @@ class Network:
         criterion = torch.nn.MSELoss()
         optimizer = optim.Adam(self.network.parameters(), lr=1e-3, weight_decay=1e-5)
         states, actions, nextStates, rewards = batch
-        X = torch.tensor([el.tolist() for el in states]).reshape(len(states), self.inputDimension)
+        X = torch.tensor([el.tolist() for el in states]).reshape(len(states), self.inputDimension) / len(states[0].vectorBoard)
         X_next = torch.tensor([el.tolist() for el in nextStates]).reshape(len(nextStates),
-                                                                                      self.inputDimension)
+                                                                                      self.inputDimension) / len(states[0].vectorBoard)
         for e in range(self.epochs):
             q_current_matrix = self.network(X)
             q_actions_done = torch.tensor([row[action] for row, action in zip(q_current_matrix, actions)])
@@ -53,7 +53,7 @@ class NetworkOnlyValid(Network):
         super().__init__(boardsize, hidden, epochs)
 
     def get_action(self, state: np.array) -> int:
-        X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32)
+        X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state)
         q_values = self.network(X)
         action = torch.argmax(torch.flatten(q_values)).item()
 
@@ -65,11 +65,11 @@ class NetworkOnlyValid(Network):
 
     def update_weights(self, batch: tuple, gamma: float):
         criterion = torch.nn.MSELoss()
-        optimizer = optim.Adam(self.network.parameters(), lr=1e-3, weight_decay=1e-5)
+        optimizer = optim.Adam(self.network.parameters(), lr=1e-2, weight_decay=1e-3)
 
         states, actions, nextStates, rewards = batch
-        X = torch.tensor([el.tolist() for el in states]).reshape(len(states), self.inputDimension)
-        X_next = torch.tensor([el.tolist() for el in nextStates]).reshape(len(nextStates), self.inputDimension)
+        X = torch.tensor([el.tolist() for el in states]).reshape(len(states), self.inputDimension) / len(states[0])
+        X_next = torch.tensor([el.tolist() for el in nextStates]).reshape(len(nextStates), self.inputDimension) / len(states[0])
 
         actions = torch.tensor(actions)
         rewards = torch.tensor(rewards)
