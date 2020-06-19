@@ -1,6 +1,4 @@
-from typing import List, Any
-
-from Game.board import Board
+from typing import List
 import numpy as np
 
 

@@ -17,7 +17,12 @@ class Network:
         self.hidden = hidden
         self.epochs = epochs
         self.network = nn.Sequential(
-            nn.Linear(self.inputDimension, self.inputDimension))
+            nn.Linear(self.inputDimension, self.hidden),
+            nn.ReLU(),
+            nn.Linear(self.hidden, self.hidden // 2),
+            nn.ReLU(),
+            nn.Linear(self.hidden // 2, self.inputDimension)
+        )
 
 
     def get_action(self, state: Board) -> int:
@@ -65,7 +70,8 @@ class NetworkOnlyValid(Network):
 
     def update_weights(self, batch: tuple, gamma: float):
         criterion = torch.nn.MSELoss()
-        optimizer = optim.Adam(self.network.parameters(), lr=1e-2, weight_decay=1e-3)
+        #optimizer = optim.Adam(self.network.parameters(), lr=1e-2, weight_decay=1e-3)
+        optimizer = optim.SGD(self.network.parameters(), lr=1e-3, momentum=0.9)
 
         states, actions, nextStates, rewards = batch
         X = torch.tensor([el.tolist() for el in states]).reshape(len(states), self.inputDimension) / len(states[0])
@@ -73,19 +79,6 @@ class NetworkOnlyValid(Network):
 
         actions = torch.tensor(actions)
         rewards = torch.tensor(rewards)
-        #q_current_matrix = self.network(X)
-        #q_actions_done = torch.tensor([row[action] for row, action in zip(q_current_matrix, actions)], requires_grad=True)
-
-        #q_target_matrix = self.network(X_next)
-        #valid_qvalues_matrix = [q_target_matrix[i][self.get_action(state)] for i, state in enumerate(nextStates)]
-
-        #q_target_matrix = self.network(X_next)
-        #valid_states = int(not nextStates)
-        #q_target_valid = q_target_matrix[valid_states]
-
-        #q_target_max = torch.tensor([torch.max(row) for row in valid_qvalues_matrix], requires_grad=True)
-        #loss = criterion(q_actions_done, torch.tensor(rewards) + gamma * q_target_max)
-        #policy_net(states).gather(dim=1, index=actions.unsqueeze(-1))
 
         curr_Q = self.network(X).gather(1, actions.unsqueeze(1))
         curr_Q = curr_Q.squeeze(1)
@@ -95,9 +88,8 @@ class NetworkOnlyValid(Network):
 
         loss = criterion(curr_Q, expected_Q.detach())
         self.loss = loss.item()
-        #print("{}".format(loss.item()))
         display.clear_output(wait=True)
         optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.network.parameters(), 1)
+        #torch.nn.utils.clip_grad_norm_(self.network.parameters(), 1)
         optimizer.step()

@@ -20,7 +20,7 @@ class AITrainer(Player):
 
     def __init__(self, id_number: int, boardsize: int, hidden: int, epochs: int,
                  rewardNoScore: float, rewardScored: float, rewardOpponentScored: float, rewardInvalidMove: float,
-                 use_invalid: bool, sample_size: int, capacity: int, gamma: float):
+                 use_invalid: bool, sample_size: int, capacity: int, gamma: float, limited_batch: bool = False):
 
         super().__init__(id_number, boardsize)
         self.rewardNoScore = rewardNoScore
@@ -35,6 +35,7 @@ class AITrainer(Player):
         self.replayMemory = ReplayMemory(sample_size, capacity)
         self.current_reward = 0
         self.gamma = gamma
+        self.limitedBatch = limited_batch
 
     def get_move(self, state: np.array) -> int:
         self.state = state.copy()
@@ -49,14 +50,14 @@ class AITrainer(Player):
             return self.action
 
     def no_score_move(self):
-        self.current_reward += self.rewardNoScore*0.5
+        self.current_reward += self.rewardNoScore * 0.5
 
     def scored(self, newPoints: int):
-        self.score += newPoints + newPoints**0.5
+        self.score += newPoints + newPoints ** 0.5
         self.current_reward += self.rewardScored
 
     def opponentScored(self, newPoints: int):
-        self.score += newPoints/2 + (newPoints/2)**0.5
+        self.score += newPoints / 2 + (newPoints / 2) ** 0.5
         self.current_reward += self.rewardOpponentScored
 
     def invalidMove(self):
@@ -69,9 +70,12 @@ class AITrainer(Player):
         else:
             self.current_reward = -20
 
-
     def add_record(self, nextState: np.array, train: bool):
-        self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward)
+        if self.limitedBatch:
+            if self.replayMemory.size < self.replayMemory.sampleSize:
+                self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward)
+        else:
+            self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward)
         if train:
             self.train_network()
         self.current_reward = 0
