@@ -4,6 +4,7 @@ from Game.board import Board
 class Game:
 
     def __init__(self, players: list, boardsize: int = 4):
+        self.boardsize = boardsize
         self.board = Board(boardsize)
         self.numBoxes = 0
         self.players = players
@@ -20,7 +21,7 @@ class Game:
         N = self.board.size
         newNumBoxes = 0
 
-        self.board.print_board()
+        # self.board.print_board()
 
         while turn < (2 * N + 2) * N:
 
@@ -45,6 +46,12 @@ class Game:
                 currentPlayer.scored(newNumBoxes - self.numBoxes)
                 self.numBoxes = newNumBoxes
 
-            self.board.print_board()
+            #self.board.print_board()
 
         # print("Players score: " + str([p.score for p in self.players]))
+
+    def reset(self):
+        self.board = Board(self.boardsize)
+        self.numBoxes = 0
+        for player in self.players:
+            player.score = 0
