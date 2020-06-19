@@ -32,3 +32,6 @@ class Player:
 
     def add_record(self, next_game_state: np.array, train: bool):
         pass
+
+    def endGameReward(self, win: bool):
+        pass

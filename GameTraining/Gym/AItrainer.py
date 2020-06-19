@@ -49,19 +49,26 @@ class AITrainer(Player):
             return self.action
 
     def no_score_move(self):
-        self.current_reward += self.rewardNoScore
+        self.current_reward += self.rewardNoScore*0.5
 
     def scored(self, newPoints: int):
-        self.score += newPoints
+        self.score += newPoints + newPoints**0.5
         self.current_reward += self.rewardScored
 
     def opponentScored(self, newPoints: int):
-        self.score += newPoints
+        self.score += newPoints/2 + (newPoints/2)**0.5
         self.current_reward += self.rewardOpponentScored
 
     def invalidMove(self):
         self.invalid = True
         self.current_reward += self.rewardInvalidMove
+
+    def endGameReward(self, win: bool):
+        if win:
+            self.current_reward = 20
+        else:
+            self.current_reward = -20
+
 
     def add_record(self, nextState: np.array, train: bool):
         self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward)

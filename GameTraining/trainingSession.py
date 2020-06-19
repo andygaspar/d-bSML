@@ -11,13 +11,13 @@ def random_experience(game: GameTraining, num_games: int, get_wins: bool = False
         if get_wins:
             wins.append(players[1].score >= players[0].score)
         game.reset()
-    print(sum(wins) / len (wins))
+    print("win rate  ",sum(wins) / len(wins))
 
 
 def training_cycle(game: GameTraining, num_games: int):
     for i in range(num_games):
         game.play(train=True)
-        if i%10 == 0:
+        if i % 200 == 0:
             print(game.players[1].network.loss)
         game.reset()
 

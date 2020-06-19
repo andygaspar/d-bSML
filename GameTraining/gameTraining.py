@@ -54,6 +54,10 @@ class GameTraining:
             turn += 1
             #self.board.print_board()
             #print("Score: " + str([str(p)+" "+str(p.score) for p in self.players]))
+        currentPlayer.endGameReward(currentPlayer.score > otherPlayer.score)
+        otherPlayer.endGameReward(otherPlayer.score > currentPlayer.score)
+        currentPlayer.add_record(self.board.vectorBoard, train)
+        otherPlayer.add_record(self.board.vectorBoard, train)
 
     def reset(self):
         self.board = Board(self.boardsize)
