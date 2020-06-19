@@ -5,12 +5,12 @@ from Players.randomPlayer import RandomPlayer
 from time import time
 
 CAPACITY = 30_000
-SAMPLE_SIZE = 2000
+SAMPLE_SIZE = 500
 HIDDEN = 100
-EPOCHS = 1000
+EPOCHS = 20
 GAMMA = 0.9
 
-REWARD_NO_SCORE:float = 1
+REWARD_NO_SCORE: float = 1
 REWARD_SCORE: float = 10
 REWARD_OPPONENT_SCORE: float = -10
 REWARD_INVALID_SCORE: float = -1000
@@ -36,6 +36,30 @@ print(time()-t, " go finio de zogar")
 
 for i in range(200):
     game.play(train=True)
+    print("gicata ",i," finita +++++++++    ++++++++   ++++++++")
+    game.reset()
+print(" 1 *****************************")
+for i in range(2000):
+    game.play(train=False)
     game.reset()
 
+for i in range(200):
+    game.play(train=True)
+    game.reset()
+print(" 2 *****************************")
+for i in range(2000):
+    game.play(train=False)
+    game.reset()
 
+for i in range(200):
+    game.play(train=True)
+    game.reset()
+print(" 3 *****************************")
+for i in range(2000):
+    game.play(train=False)
+    game.reset()
+
+for i in range(200):
+    game.play(train=True)
+    game.reset()
+print(" 4 *****************************")

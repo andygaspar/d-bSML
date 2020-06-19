@@ -13,7 +13,8 @@ class Network:
 
     def __init__(self, boardsize: int, hidden: int, epochs: int):
         self.inputDimension = (2 * boardsize + 2) * boardsize  # dimensions
-        self.hidden = hidden
+        # self.hidden = hidden
+        self.hidden = 4
         self.epochs = epochs
         self.network = nn.Sequential(
             nn.Linear(self.inputDimension, self.hidden),
@@ -83,13 +84,20 @@ class NetworkOnlyValid(Network):
             curr_Q = curr_Q.squeeze(1)
             next_Q = self.network(X_next)
             max_next_Q = torch.max(next_Q, 1)[0]
+            # print(curr_Q)
+            # print(max_next_Q)
+            # print(rewards)
             expected_Q = rewards + gamma * max_next_Q
-
+            # print(curr_Q, expected_Q)
             loss = criterion(curr_Q, expected_Q.detach())
+            # print(loss)
 
-            if e % 100 == 0: print("[EPOCH]: {}, [LOSS]: {}".format(e, loss.item()))
+            #if e % 100 == 0: print("[EPOCH]: {}, [LOSS]: {}".format(e, loss.item()))
             display.clear_output(wait=True)
-            #print(self.network.state_dict())
             optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.network.parameters(), max_norm=1)
+
             optimizer.step()
+
+        print("loss", loss.item())
