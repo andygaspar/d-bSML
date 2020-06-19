@@ -12,19 +12,13 @@ class Network:
     epochs: int
 
     def __init__(self, boardsize: int, hidden: int, epochs: int):
+        self.loss = 0
         self.inputDimension = (2 * boardsize + 2) * boardsize  # dimensions
-        # self.hidden = hidden
-        self.hidden = 4
+        self.hidden = hidden
         self.epochs = epochs
         self.network = nn.Sequential(
-            nn.Linear(self.inputDimension, self.hidden),
-            nn.ReLU(),
-            nn.Linear(self.hidden, self.hidden*2),
-            nn.ReLU(),
-            nn.Linear(self.hidden*2, self.hidden),
-            nn.ReLU(),
-            nn.Linear(self.hidden, self.inputDimension),
-        )
+            nn.Linear(self.inputDimension, self.inputDimension))
+
 
     def get_action(self, state: Board) -> int:
         X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32)
@@ -79,25 +73,31 @@ class NetworkOnlyValid(Network):
 
         actions = torch.tensor(actions)
         rewards = torch.tensor(rewards)
-        for e in range(self.epochs):
-            curr_Q = self.network(X).gather(1, actions.unsqueeze(1))
-            curr_Q = curr_Q.squeeze(1)
-            next_Q = self.network(X_next)
-            max_next_Q = torch.max(next_Q, 1)[0]
-            # print(curr_Q)
-            # print(max_next_Q)
-            # print(rewards)
-            expected_Q = rewards + gamma * max_next_Q
-            # print(curr_Q, expected_Q)
-            loss = criterion(curr_Q, expected_Q.detach())
-            # print(loss)
+        #q_current_matrix = self.network(X)
+        #q_actions_done = torch.tensor([row[action] for row, action in zip(q_current_matrix, actions)], requires_grad=True)
 
-            #if e % 100 == 0: print("[EPOCH]: {}, [LOSS]: {}".format(e, loss.item()))
-            display.clear_output(wait=True)
-            optimizer.zero_grad()
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(self.network.parameters(), max_norm=1)
+        #q_target_matrix = self.network(X_next)
+        #valid_qvalues_matrix = [q_target_matrix[i][self.get_action(state)] for i, state in enumerate(nextStates)]
 
-            optimizer.step()
+        #q_target_matrix = self.network(X_next)
+        #valid_states = int(not nextStates)
+        #q_target_valid = q_target_matrix[valid_states]
 
-        print("loss", loss.item())
+        #q_target_max = torch.tensor([torch.max(row) for row in valid_qvalues_matrix], requires_grad=True)
+        #loss = criterion(q_actions_done, torch.tensor(rewards) + gamma * q_target_max)
+        #policy_net(states).gather(dim=1, index=actions.unsqueeze(-1))
+
+        curr_Q = self.network(X).gather(1, actions.unsqueeze(1))
+        curr_Q = curr_Q.squeeze(1)
+        next_Q = self.network(X_next)
+        max_next_Q = torch.max(next_Q, 1)[0]
+        expected_Q = rewards + gamma * max_next_Q
+
+        loss = criterion(curr_Q, expected_Q.detach())
+        self.loss = loss.item()
+        #print("{}".format(loss.item()))
+        display.clear_output(wait=True)
+        optimizer.zero_grad()
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.network.parameters(), 1)
+        optimizer.step()
