@@ -28,9 +28,8 @@ def training_cycle(game: GameTraining, num_games: int):
 
 
 CAPACITY = 30_000
-SAMPLE_SIZE = 1000
+SAMPLE_SIZE = 1_000
 HIDDEN = 100
-EPOCHS = 1000
 GAMMA = 0.5
 
 REWARD_NO_SCORE: float = 0.5
@@ -44,7 +43,7 @@ UPDATE_STEP = 1
 boardsize = 3
 
 use_invalid = False
-players = [RandomPlayer(1, boardsize), AITrainer(2, boardsize, HIDDEN, EPOCHS, REWARD_NO_SCORE, REWARD_SCORE,
+players = [RandomPlayer(1, boardsize), AITrainer(2, boardsize, HIDDEN, REWARD_NO_SCORE, REWARD_SCORE,
                                                  REWARD_OPPONENT_SCORE, REWARD_INVALID_SCORE, use_invalid, SAMPLE_SIZE,
                                                  CAPACITY, GAMMA, limited_batch=False)]
 game = GameTraining(players, boardsize)

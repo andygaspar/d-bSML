@@ -18,7 +18,7 @@ class AITrainer(Player):
     current_reward: int
     gamma: float
 
-    def __init__(self, id_number: int, boardsize: int, hidden: int, epochs: int,
+    def __init__(self, id_number: int, boardsize: int, hidden: int,
                  rewardNoScore: float, rewardScored: float, rewardOpponentScored: float, rewardInvalidMove: float,
                  use_invalid: bool, sample_size: int, capacity: int, gamma: float, limited_batch: bool = False):
 
@@ -30,8 +30,8 @@ class AITrainer(Player):
         self.state = None
         self.action = None
         self.invalid = False
-        self.network = Network(boardsize, hidden, epochs) \
-            if use_invalid == True else NetworkOnlyValid(boardsize, hidden, epochs)
+        self.network = Network(boardsize, hidden) \
+            if use_invalid == True else NetworkOnlyValid(boardsize, hidden)
         self.replayMemory = ReplayMemory(sample_size, capacity)
         self.current_reward = 0
         self.gamma = gamma
