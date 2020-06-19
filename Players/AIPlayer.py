@@ -3,6 +3,7 @@ from Players.player import Player
 from GameTraining.Gym.replayMemory import ReplayMemory
 from GameTraining.Gym import network
 import numpy as np
+import torch
 
 
 class AIPlayer(Player):
@@ -16,19 +17,15 @@ class AIPlayer(Player):
     score: int
     network: network
 
-    def __init__(self, id_number: int, boardsize: int, rewardScored: float = 10,
-                 rewardOpponentScored: float = -10, rewardInvalidMove: float = -100):
+    def __init__(self, id_number: int, boardsize: int, hidden: int):
         super().__init__(id_number, boardsize)
-        self.rewardInvalidMove = rewardInvalidMove
-        self.rewardScored = rewardScored
-        self.rewardOpponentScored = rewardOpponentScored
-        self.replayBuffer = []
-        self.state = None
-        self.nextState = None
-        self.invalid = False
-        self.network = network(boardsize, rewardScored, rewardOpponentScored, rewardInvalidMove)
 
-    def get_move(self, state) -> int:
+        self.invalid = False
+        self.network = network.Network(boardsize, hidden)
+        self.network.network.load_state_dict(torch.load('prova.pt'))
+        self.network.network.eval()
+
+    def get_move(self, state: np.array) -> int:
 
         if not self.invalid:
             self.state = state
@@ -36,18 +33,12 @@ class AIPlayer(Player):
 
         else:
             self.invalid = False
-            validMoves = np.flatnonzero(state.vectorBoard == 0)
+            validMoves = np.flatnonzero(state == 0)
             self.action = np.random.choice(validMoves)
             return self.action
 
-    def update(self, record: ReplayMemory):
-        self.replayBuffer.append(record)
-
     def scored(self, newPoints: int):
         self.score += newPoints
-
-    def opponentScored(self, newPoints: int):
-        pass
 
     def invalidMove(self):
         self.invalid = True

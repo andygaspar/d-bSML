@@ -22,10 +22,10 @@ class Network:
             nn.Linear(self.hidden // 2, self.inputDimension)
         )
 
-
-    def get_action(self, state: Board) -> int:
-        X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state.vectorBoard)
-        Q_values = self.network(X)
+    def get_action(self, state: np.array) -> int:
+        X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state)
+        with torch.no_grad():
+            Q_values = self.network(X)
         return torch.argmax(torch.flatten(Q_values)).item()
 
     def update_weights(self, batch: tuple, gamma: float):
@@ -71,3 +71,6 @@ class NetworkOnlyValid(Network):
             action = torch.argmax(torch.flatten(q_values)).item()
 
         return action
+
+    def save_weights(self):
+        torch.save(self.network.state_dict(), 'prova.pt')

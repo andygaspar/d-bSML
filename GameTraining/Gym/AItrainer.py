@@ -53,11 +53,13 @@ class AITrainer(Player):
         self.current_reward += self.rewardNoScore * 0.5
 
     def scored(self, newPoints: int):
-        self.score += newPoints + newPoints ** 0.5
+        self.score += newPoints
+        #self.score += newPoints + newPoints ** 0.5
         self.current_reward += self.rewardScored
 
     def opponentScored(self, newPoints: int):
-        self.score += newPoints / 2 + (newPoints / 2) ** 0.5
+        self.score += newPoints
+        #self.score += newPoints / 2 + (newPoints / 2) ** 0.5
         self.current_reward += self.rewardOpponentScored
 
     def invalidMove(self):

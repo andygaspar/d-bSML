@@ -1,6 +1,8 @@
 from GameTraining.Gym.AItrainer import AITrainer
 from GameTraining.gameTraining import GameTraining
+from Players.AIPlayer import AIPlayer
 from Players.randomPlayer import RandomPlayer
+from Game.game import Game
 from time import time
 import numpy as np
 
@@ -28,7 +30,7 @@ def training_cycle(game: GameTraining, num_games: int):
 
 
 CAPACITY = 30_000
-SAMPLE_SIZE = 1_000
+SAMPLE_SIZE = 8
 HIDDEN = 100
 GAMMA = 0.5
 
@@ -48,11 +50,20 @@ players = [RandomPlayer(1, boardsize), AITrainer(2, boardsize, HIDDEN, REWARD_NO
                                                  CAPACITY, GAMMA, limited_batch=False)]
 game = GameTraining(players, boardsize)
 
-network_experience(game, 1_000, get_wins=True)
+network_experience(game, 20, get_wins=True)
 
-for i in range(20):
+for i in range(1):
     t = time()
-    training_cycle(game, 1_000)
+    training_cycle(game, 2)
     # random_experience(game, 1_000, get_wins=True)
 
     print("iteration ", i, "   time: ", str(int((time() - t) / 60)) + str(int(((time() - t) % 60) * 60)))
+
+players[1].network.save_weights()
+
+AI = AIPlayer(3, 3, HIDDEN)
+test_players = [players[0],AI]
+test_match = Game(test_players, 3)
+test_match.play()
+print(test_players[0].score,test_players[1].score)
+

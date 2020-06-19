@@ -22,13 +22,13 @@ class Game:
 
         self.board.print_board()
 
-        while turn < 5:  # (2 * N + 2) * N:
+        while turn < (2 * N + 2) * N:
 
-            move = currentPlayer.get_move(self.board)
+            move = currentPlayer.get_move(self.board.vectorBoard)
 
             while not self.is_valid(move):
                 currentPlayer.invalidMove()
-                move = currentPlayer.get_move(self.board)
+                move = currentPlayer.get_move(self.board.vectorBoard)
                 # print("Invalid Move")
 
             self.board.set_board(move)
@@ -44,7 +44,6 @@ class Game:
             else:
                 currentPlayer.scored(newNumBoxes - self.numBoxes)
                 self.numBoxes = newNumBoxes
-                otherPlayer.opponentScored()
 
             self.board.print_board()
 
