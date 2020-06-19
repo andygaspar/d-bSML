@@ -31,8 +31,8 @@ class Network:
     def update_weights(self, batch: tuple, gamma: float):
         criterion = torch.nn.MSELoss()
 
-        # optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
-        optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
+        optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
+        # optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
 
         states, actions, nextStates, rewards = batch
         X = torch.tensor([el.tolist() for el in states]).reshape(len(states), self.inputDimension) / len(states[0])
@@ -52,7 +52,7 @@ class Network:
         display.clear_output(wait=True)
         optimizer.zero_grad()
         loss.backward()
-        # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 1)
+        # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
         optimizer.step()
 
 
@@ -69,7 +69,6 @@ class NetworkOnlyValid(Network):
         while state[action] == 1:
             q_values[0, action] = torch.min(q_values).item() - 10
             action = torch.argmax(torch.flatten(q_values)).item()
-
         return action
 
     def save_weights(self):

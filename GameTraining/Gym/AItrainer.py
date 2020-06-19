@@ -72,9 +72,9 @@ class AITrainer(Player):
 
     def endGameReward(self, win: bool):
         if win:
-            self.current_reward = 100
+            self.current_reward += 100
         else:
-            self.current_reward = -100
+            self.current_reward += -100
 
     def add_record(self, nextState: np.array, train: bool):
         if self.limitedBatch:
