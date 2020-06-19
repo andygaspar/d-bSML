@@ -34,6 +34,6 @@ class ReplayMemory:
         self.size += 1
 
     def get_sample(self):
-        random_idx = np.random.choice(range(self.size), self.sampleSize).astype(int)
+        random_idx = np.random.choice(range(self.size), size=self.sampleSize, replace=False).astype(int)
         return [self.states[i] for i in random_idx], [self.actions[i] for i in random_idx], \
                [self.nextStates[i] for i in random_idx], [self.rewards[i] for i in random_idx]
