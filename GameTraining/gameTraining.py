@@ -15,7 +15,7 @@ class GameTraining:
     def is_valid(self, idx: int) -> bool:
         return not self.board.vectorBoard[idx]  # (1==True gives False, 0 == False gives True)
 
-    def play(self, train):
+    def play(self, train: bool):
 
         currentPlayer = self.players[0]
         otherPlayer = self.players[1]
