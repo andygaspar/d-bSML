@@ -49,13 +49,13 @@ only_valid_moves = True
 
 trainer = AITrainer(2, boardsize, HIDDEN, REWARD_NO_SCORE, REWARD_SCORE, REWARD_OPPONENT_SCORE,
                     REWARD_INVALID_SCORE, REWARD_SCORES_IN_ROW, REWARD_WIN, REWARD_LOSE,
-                    only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, 
+                    only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA,
                     fixed_batch=False, eps_greedy_value=1, softmax=False)
 
 players = [RandomPlayer(1, boardsize), trainer]
 game = GameTraining(players, boardsize)
 
-network_experience(game, 1_000, get_wins=True)
+network_experience(game, 100, get_wins=True)
 
 for i in range(1):
     t = time()
@@ -64,20 +64,20 @@ for i in range(1):
 
     print("iteration ", i, "   time: ", str(int((time() - t) / 60)) + ": " + str(int(((time() - t) % 60) * 60)))
 
-# players[1].network.save_weights()
+AI = players[1].get_trained_player(1)
 
-AI = AIPlayer(3, boardsize, HIDDEN)
-test_players = [players[0], RandomPlayer(2, boardsize)]
+#AI = AIPlayer(3, boardsize, HIDDEN)
+test_players = [players[0], AI]
 test_match = Game(test_players, boardsize)
-num_games = 10_000
+num_games = 1
 wins = 0
 
 start = time()
-#for j in range(10):
-#    for i in range(num_games):
-#        test_match.play()
-#        wins += int(test_players[1].score >= test_players[0].score)
-#        test_match.reset()
+for j in range(10):
+    for i in range(num_games):
+        test_match.play()
+        wins += int(test_players[1].score >= test_players[0].score)
+        test_match.reset()
 
-#    print("win rate: ", wins / (num_games * (j + 1)))
-    #print("end: ", time() - start)
+    print("win rate: ", wins / (num_games * (j + 1)))
+    print("end: ", time() - start)
