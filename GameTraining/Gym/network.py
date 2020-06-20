@@ -22,16 +22,27 @@ class Network:
             nn.Linear(self.hidden // 2, self.inputDimension)
         )
 
-    def get_action(self, state: np.array, only_valid: bool) -> int:
+    def sample_action(self, Q_values: torch.tensor, softmax: bool) -> int:
+        if softmax:
+            Q_values_probability_list = Q_values.softmax(0).flatten().tolist()
+            action = np.random.choice(range(len(Q_values)), size=1, p=Q_values_probability_list)
+            return action
+        else:
+            return torch.argmax(torch.flatten(Q_values)).item()
+
+
+    def get_action(self, state: np.array, only_valid: bool, softmax: bool) -> int:
         X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state)
         with torch.no_grad():
-            Q_values = self.network(X)
-        action = torch.argmax(torch.flatten(Q_values)).item()
+            Q_values = torch.flatten(self.network(X))
+
+        action = self.sample_action(Q_values, softmax)
 
         if only_valid:
             while state[action] == 1:
-                Q_values[0, action] = torch.min(Q_values).item() - 10
-                action = torch.argmax(torch.flatten(Q_values)).item()
+                Q_values[action] = torch.min(Q_values).item() - 10
+                action = self.sample_action(Q_values, softmax)
+
         return action
 
     def update_weights(self, batch: tuple, gamma: float):
