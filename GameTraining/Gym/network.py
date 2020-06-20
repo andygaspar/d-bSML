@@ -9,8 +9,11 @@ from IPython import display
 class Network:
     inputDimension: int  # dimensions
     hidden: int
+    network: torch.nn.Sequential
+    only_valid_actions: bool
+    softmax: bool
 
-    def __init__(self, boardsize: int, hidden: int):
+    def __init__(self, boardsize: int, hidden: int, ony_valid_actions: bool, softmax: bool):
         self.loss = 0
         self.inputDimension = (2 * boardsize + 2) * boardsize  # dimensions
         self.hidden = hidden
@@ -21,27 +24,28 @@ class Network:
             nn.ReLU(),
             nn.Linear(self.hidden // 2, self.inputDimension)
         )
+        self.only_valid_actions = ony_valid_actions
+        self.softmax = softmax
 
-    def sample_action(self, Q_values: torch.tensor, softmax: bool) -> int:
-        if softmax:
-            Q_values_probability_list = Q_values.softmax(0).flatten().tolist()
-            action = np.random.choice(range(len(Q_values)), size=1, p=Q_values_probability_list)
+    def sample_action(self, Q_values: torch.tensor) -> int:
+        if self.softmax:
+            Q_values_probabilities = Q_values.softmax(0).flatten().tolist()
+            action = np.random.choice(range(len(Q_values)), size=1, p=Q_values_probabilities)
             return action
         else:
             return torch.argmax(torch.flatten(Q_values)).item()
 
-
-    def get_action(self, state: np.array, only_valid: bool, softmax: bool) -> int:
+    def get_action(self, state: np.array) -> int:
         X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state)
         with torch.no_grad():
             Q_values = torch.flatten(self.network(X))
 
-        action = self.sample_action(Q_values, softmax)
+        action = self.sample_action(Q_values)
 
-        if only_valid:
+        if self.only_valid_actions:
             while state[action] == 1:
                 Q_values[action] = torch.min(Q_values).item() - 10
-                action = self.sample_action(Q_values, softmax)
+                action = self.sample_action(Q_values)
 
         return action
 
@@ -53,7 +57,8 @@ class Network:
 
         states, actions, nextStates, rewards = batch
         X = torch.tensor([el.tolist() for el in states]).reshape(len(states), self.inputDimension) / len(states[0])
-        X_next = torch.tensor([el.tolist() for el in nextStates]).reshape(len(nextStates), self.inputDimension) / len(states[0])
+        X_next = torch.tensor([el.tolist() for el in nextStates]).reshape(len(nextStates), self.inputDimension) / len(
+            states[0])
 
         actions = torch.tensor(actions)
         rewards = torch.tensor(rewards)

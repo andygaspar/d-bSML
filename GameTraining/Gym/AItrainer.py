@@ -1,41 +1,50 @@
-from Game.board import Board
 from Players.player import Player
-from GameTraining.Gym.replayMemory import ReplayMemory
 from GameTraining.Gym.network import Network
 import numpy as np
 from GameTraining.Gym.replayMemory import ReplayMemory
 
 
 class AITrainer(Player):
-    state: np.array
-    action: int
     rewardNoScore: float
     rewardScored: float
     rewardOpponentScored: float
     rewardInvalidMove: float
-    score: int
+    rewardScoresInRow: float
+    rewardWinning: float
+    rewardLosing: float
+    state: np.array
+    action: int
+    invalid: bool
+    network: Network.network
     replayMemory: ReplayMemory
     current_reward: int
+    score: int
     gamma: float
+    fixed_batch: bool
+    softmax: bool
 
     def __init__(self, id_number: int, boardsize: int, hidden: int,
                  rewardNoScore: float, rewardScored: float, rewardOpponentScored: float, rewardInvalidMove: float,
-                 use_invalid: bool, sample_size: int, capacity: int, gamma: float, limited_batch: bool = False):
+                 rewardScoresInRow: float, rewardWinning: float, rewardLosing: float, only_valid: bool, sample_size: int, capacity: int, gamma: float, limited_batch: bool = False, softmax: bool = False):
 
         super().__init__(id_number, boardsize)
         self.rewardNoScore = rewardNoScore
         self.rewardInvalidMove = rewardInvalidMove
         self.rewardScored = rewardScored
         self.rewardOpponentScored = rewardOpponentScored
-        self.rewardScoresInRow = 0
+        self.rewardScoresInRow = rewardScoresInRow
+        self.rewardWinning = rewardWinning
+        self.rewardLosing - rewardLosing
+        self.network = Network(boardsize, hidden, only_valid, softmax)
         self.state = None
         self.action = None
         self.invalid = False
-        self.network = Network(boardsize, hidden, not use_invalid)
         self.replayMemory = ReplayMemory(sample_size, capacity)
         self.current_reward = 0
+        self.score = 0
         self.gamma = gamma
-        self.limitedBatch = limited_batch
+        self.fixed_batch = limited_batch
+        self.softmax = softmax
 
     def get_move(self, state: np.array) -> int:
         self.state = state.copy()
@@ -76,7 +85,7 @@ class AITrainer(Player):
             self.current_reward += -100
 
     def add_record(self, nextState: np.array, train: bool):
-        if self.limitedBatch:
+        if self.fixed_batch:
             if self.replayMemory.size < self.replayMemory.sampleSize:
                 self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward)
         else:
