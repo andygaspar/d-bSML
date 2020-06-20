@@ -22,11 +22,17 @@ class Network:
             nn.Linear(self.hidden // 2, self.inputDimension)
         )
 
-    def get_action(self, state: np.array) -> int:
+    def get_action(self, state: np.array, only_valid: bool) -> int:
         X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state)
         with torch.no_grad():
             Q_values = self.network(X)
-        return torch.argmax(torch.flatten(Q_values)).item()
+        action = torch.argmax(torch.flatten(Q_values)).item()
+
+        if only_valid:
+            while state[action] == 1:
+                Q_values[0, action] = torch.min(Q_values).item() - 10
+                action = torch.argmax(torch.flatten(Q_values)).item()
+        return action
 
     def update_weights(self, batch: tuple, gamma: float):
         criterion = torch.nn.MSELoss()
@@ -54,22 +60,6 @@ class Network:
         loss.backward()
         # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
         optimizer.step()
-
-
-class NetworkOnlyValid(Network):
-
-    def __init__(self, boardsize: int, hidden: int):
-        super().__init__(boardsize, hidden)
-
-    def get_action(self, state: np.array) -> int:
-        X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state)
-        q_values = self.network(X)
-        action = torch.argmax(torch.flatten(q_values)).item()
-
-        while state[action] == 1:
-            q_values[0, action] = torch.min(q_values).item() - 10
-            action = torch.argmax(torch.flatten(q_values)).item()
-        return action
 
     def save_weights(self):
         torch.save(self.network.state_dict(), 'prova.pt')

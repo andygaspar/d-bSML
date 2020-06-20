@@ -1,7 +1,7 @@
 from Game.board import Board
 from Players.player import Player
 from GameTraining.Gym.replayMemory import ReplayMemory
-from GameTraining.Gym.network import Network, NetworkOnlyValid
+from GameTraining.Gym.network import Network
 import numpy as np
 from GameTraining.Gym.replayMemory import ReplayMemory
 
@@ -31,8 +31,7 @@ class AITrainer(Player):
         self.state = None
         self.action = None
         self.invalid = False
-        self.network = Network(boardsize, hidden) \
-            if use_invalid == True else NetworkOnlyValid(boardsize, hidden)
+        self.network = Network(boardsize, hidden, not use_invalid)
         self.replayMemory = ReplayMemory(sample_size, capacity)
         self.current_reward = 0
         self.gamma = gamma
