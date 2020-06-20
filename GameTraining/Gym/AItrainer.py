@@ -1,3 +1,4 @@
+from Players.AIPlayer import AIPlayer
 from Players.player import Player
 from GameTraining.Gym.network import Network
 import numpy as np
@@ -15,7 +16,8 @@ class AITrainer(Player):
     state: np.array
     action: int
     invalid: bool
-    network: Network.network
+    network: Network
+    hidden: int
     replayMemory: ReplayMemory
     current_reward: int
     score: int
@@ -114,3 +116,6 @@ class AITrainer(Player):
 
     def __str__(self):
         return "AI trainer player"
+
+    def get_trained_player(self, id_number: int) -> AIPlayer:
+        return AIPlayer(id_number, self.network, self.eps_greedy_value, self.softmax)
