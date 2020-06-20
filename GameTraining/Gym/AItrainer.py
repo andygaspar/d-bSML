@@ -27,8 +27,8 @@ class AITrainer(Player):
     def __init__(self, id_number: int, boardsize: int, hidden: int,
                  rewardNoScore: float, rewardScored: float, rewardOpponentScored: float, rewardInvalidMove: float,
                  rewardScoresInRow: float, rewardWinning: float, rewardLosing: float, only_valid: bool,
-                 sample_size: int, capacity: int, gamma: float, fixed_batch: bool = False,
-                 eps_greedy_value: float = 1., softmax: bool = False):
+                 sample_size: int, capacity: int, gamma: float,
+                 fixed_batch: bool = False, eps_greedy_value: float = 1., softmax: bool = False):
 
         super().__init__(id_number, boardsize)
         self.rewardNoScore = rewardNoScore

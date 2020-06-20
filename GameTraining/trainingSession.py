@@ -28,9 +28,10 @@ def training_cycle(game: GameTraining, num_games: int):
             print("Mean loss in previous " + str(interval) + " games ", np.mean(losses))
             losses = []
 
-
-CAPACITY = 30_000
+#ReplayMemory Params
 SAMPLE_SIZE = 1_000
+CAPACITY = 30_000
+UPDATE_STEP = 1
 HIDDEN = 100
 GAMMA = 0.5
 
@@ -38,16 +39,20 @@ REWARD_NO_SCORE: float = 0.5
 REWARD_SCORE: float = 10
 REWARD_OPPONENT_SCORE: float = -10
 REWARD_INVALID_SCORE: float = -1000
+REWARD_SCORES_IN_ROW: float = 0
 REWARD_WIN = 50
-REWARD_LOOSE = -50
-UPDATE_STEP = 1
+REWARD_LOSE = -50
+
 
 boardsize = 3
+only_valid_moves = True
 
-use_invalid = False
-players = [RandomPlayer(1, boardsize), AITrainer(2, boardsize, HIDDEN, REWARD_NO_SCORE, REWARD_SCORE,
-                                                 REWARD_OPPONENT_SCORE, REWARD_INVALID_SCORE, use_invalid, SAMPLE_SIZE,
-                                                 CAPACITY, GAMMA, limited_batch=False)]
+trainer = AITrainer(2, boardsize, HIDDEN, REWARD_NO_SCORE, REWARD_SCORE, REWARD_OPPONENT_SCORE,
+                    REWARD_INVALID_SCORE, REWARD_SCORES_IN_ROW, REWARD_WIN, REWARD_LOSE,
+                    only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, UPDATE_STEP,
+                    fixed_batch=False, eps_greedy_value=1, softmax=False)
+
+players = [RandomPlayer(1, boardsize), trainer]
 #game = GameTraining(players, boardsize)
 
 #network_experience(game, 1_000, get_wins=True)
