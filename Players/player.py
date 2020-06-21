@@ -35,3 +35,6 @@ class Player:
 
     def endGameReward(self, win: bool):
         pass
+
+    def update_eps(self, i: int):
+        pass

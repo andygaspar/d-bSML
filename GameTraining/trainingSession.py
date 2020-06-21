@@ -1,15 +1,9 @@
 from GameTraining.Gym.AItrainer import AITrainer
-from GameTraining.gameTraining import GameTraining
 from Players.AIPlayer import AIPlayer
 from Players.randomPlayer import RandomPlayer
+from GameTraining.gameTraining import GameTraining
 from Game.game import Game
 from time import time
-import numpy as np
-import torch
-
-torch.cuda.current_device()
-
-print(torch.cuda.is_available())
 
 
 def network_experience(game: GameTraining, num_games: int, get_wins: bool = False):
@@ -19,26 +13,30 @@ def network_experience(game: GameTraining, num_games: int, get_wins: bool = Fals
         if get_wins:
             wins.append(players[1].score >= players[0].score)
         game.reset()
-    print("win rate  ", sum(wins) / len(wins))
+    if get_wins : print("win rate  ", sum(wins) / len(wins))
 
-loss_to_save = []
 
 def training_cycle(game: GameTraining, num_games: int):
-    losses = []
+    #losses = []
+    eps = []
     interval: int = 100
     for i in range(num_games):
         game.play(train=True)
-        losses.append(game.players[1].network.loss)
-        loss_to_save.append(game.players[1].network.loss)
+        #losses.append(game.players[1].network.loss)
+        eps.append(game.players[1].eps_greedy_value)
         game.reset()
+        #if i % interval == 0:
+        #    print("Mean loss in previous " + str(interval) + " games ", np.mean(losses))
+        #    losses = []
+        game.players[1].update_eps(i)
+    return eps
 
-        if i % interval == 0:
-            print("Mean loss in previous " + str(interval) + " games ", np.mean(losses))
-            losses = []
+#ReplayMemory Params
+SAMPLE_SIZE = 20
+CAPACITY = 3_000
+UPDATE_STEP = 1
 
-
-CAPACITY = 30_000
-SAMPLE_SIZE = 3_000
+#
 HIDDEN = 100
 GAMMA = 0.5
 
@@ -46,47 +44,51 @@ REWARD_NO_SCORE: float = 0.5
 REWARD_SCORE: float = 10
 REWARD_OPPONENT_SCORE: float = -10
 REWARD_INVALID_SCORE: float = -1000
+REWARD_SCORES_IN_ROW: float = 0
 REWARD_WIN = 50
-REWARD_LOOSE = -50
-UPDATE_STEP = 1
+REWARD_LOSE = -50
+FIXED_BATCH = False
+EPS_GREEDY_VALUE = 1.
+SOFTMAX = False
+NUM_GAMES = 1_000
+EPS_MIN: float = 0.01
+DECAY: float = 0.001
+
 
 boardsize = 3
+only_valid_moves = True
 
-use_invalid = False
-players = [RandomPlayer(1, boardsize), AITrainer(2, boardsize, HIDDEN, REWARD_NO_SCORE, REWARD_SCORE,
-                                                 REWARD_OPPONENT_SCORE, REWARD_INVALID_SCORE, use_invalid, SAMPLE_SIZE,
-                                                 CAPACITY, GAMMA, limited_batch=False)]
+trainer = AITrainer(2, boardsize, HIDDEN, REWARD_NO_SCORE, REWARD_SCORE, REWARD_OPPONENT_SCORE,
+                    REWARD_INVALID_SCORE, REWARD_SCORES_IN_ROW, REWARD_WIN, REWARD_LOSE,
+                    only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, NUM_GAMES, EPS_MIN, DECAY,
+                    fixed_batch=FIXED_BATCH, eps_greedy_value=EPS_GREEDY_VALUE, softmax=SOFTMAX)
+
+players = [RandomPlayer(1, boardsize), trainer]
 game = GameTraining(players, boardsize)
 
-network_experience(game, 1_000, get_wins=True)
+network_experience(game, 20, get_wins=False)
 
-for d in range(5):
-    t = time()
-    training_cycle(game, 1_000)
-    #network_experience(game, 1_000, get_wins=True)
-    print("iteration ", d, "   time: ", str(int((time() - t) / 60)) + ": " + str(int(((time() - t) % 60) * 60)))
+#t = time()
+#training_cycle(game, NUM_GAMES)
+#network_experience(game, 1_000, get_wins=True)
 
-players[1].network.save_weights()
+#print("time: ", str(int((time() - t) / 60)) + ": " + str(int(((time() - t) % 60) * 60)))
 
-AI = AIPlayer(3, boardsize, HIDDEN)
-test_players = [players[0], RandomPlayer(2, boardsize)]
-test_match = Game(test_players, boardsize)
-num_games = 10_000
-wins = 0
+#AI = players[1].get_trained_player(1)
 
-start = time()
-for j in range(1):
-    for i in range(num_games):
-        test_match.play()
-        wins += int(test_players[1].score >= test_players[0].score)
-        test_match.reset()
+#test_players = [players[0], AI]
+#test_match = Game(test_players, boardsize)
+#num_games = 1
+#wins = 0
 
-    print("win rate: ", wins / (num_games * (j + 1)))
-    #print("end: ", time() - start)
+#start = time()
+#for j in range(10):
+#    for i in range(num_games):
+#        test_match.play()
+#        wins += int(test_players[1].score >= test_players[0].score)
+#        test_match.reset()
 
+#    print("win rate: ", wins / (num_games * (j + 1)))
+#    print("end: ", time() - start)
 
-import csv
-
-with open('new_net_dqn_no_greedy_3000batch_20000iter.csv', 'w', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerow(loss_to_save)
+#network_experience(game, 3_000)
