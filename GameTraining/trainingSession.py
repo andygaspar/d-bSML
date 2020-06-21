@@ -5,6 +5,11 @@ from Players.randomPlayer import RandomPlayer
 from Game.game import Game
 from time import time
 import numpy as np
+import torch
+
+torch.cuda.current_device()
+
+print(torch.cuda.is_available())
 
 
 def network_experience(game: GameTraining, num_games: int, get_wins: bool = False):
@@ -16,6 +21,7 @@ def network_experience(game: GameTraining, num_games: int, get_wins: bool = Fals
         game.reset()
     print("win rate  ", sum(wins) / len(wins))
 
+loss_to_save = []
 
 def training_cycle(game: GameTraining, num_games: int):
     losses = []
@@ -23,14 +29,16 @@ def training_cycle(game: GameTraining, num_games: int):
     for i in range(num_games):
         game.play(train=True)
         losses.append(game.players[1].network.loss)
+        loss_to_save.append(game.players[1].network.loss)
         game.reset()
+
         if i % interval == 0:
             print("Mean loss in previous " + str(interval) + " games ", np.mean(losses))
             losses = []
 
 
 CAPACITY = 30_000
-SAMPLE_SIZE = 1_000
+SAMPLE_SIZE = 3_000
 HIDDEN = 100
 GAMMA = 0.5
 
@@ -48,18 +56,17 @@ use_invalid = False
 players = [RandomPlayer(1, boardsize), AITrainer(2, boardsize, HIDDEN, REWARD_NO_SCORE, REWARD_SCORE,
                                                  REWARD_OPPONENT_SCORE, REWARD_INVALID_SCORE, use_invalid, SAMPLE_SIZE,
                                                  CAPACITY, GAMMA, limited_batch=False)]
-#game = GameTraining(players, boardsize)
+game = GameTraining(players, boardsize)
 
-#network_experience(game, 1_000, get_wins=True)
+network_experience(game, 1_000, get_wins=True)
 
-#for i in range(20):
-#    t = time()
-#    training_cycle(game, 1_000)
-#     random_experience(game, 1_000, get_wins=True)
+for d in range(5):
+    t = time()
+    training_cycle(game, 1_000)
+    #network_experience(game, 1_000, get_wins=True)
+    print("iteration ", d, "   time: ", str(int((time() - t) / 60)) + ": " + str(int(((time() - t) % 60) * 60)))
 
-#    print("iteration ", i, "   time: ", str(int((time() - t) / 60)) + ": " + str(int(((time() - t) % 60) * 60)))
-
-# players[1].network.save_weights()
+players[1].network.save_weights()
 
 AI = AIPlayer(3, boardsize, HIDDEN)
 test_players = [players[0], RandomPlayer(2, boardsize)]
@@ -68,7 +75,7 @@ num_games = 10_000
 wins = 0
 
 start = time()
-for j in range(10):
+for j in range(1):
     for i in range(num_games):
         test_match.play()
         wins += int(test_players[1].score >= test_players[0].score)
@@ -76,3 +83,10 @@ for j in range(10):
 
     print("win rate: ", wins / (num_games * (j + 1)))
     #print("end: ", time() - start)
+
+
+import csv
+
+with open('new_net_dqn_no_greedy_3000batch_20000iter.csv', 'w', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(loss_to_save)
