@@ -30,8 +30,8 @@ class Network:
             nn.Linear(self.inputDimension, self.inputDimension),
         )
         self.network.to(self.device)
-        torch.cuda.current_device()
-        print(torch.cuda.is_available())
+        # torch.cuda.current_device()
+        # print(torch.cuda.is_available())
         self.only_valid_actions = ony_valid_actions
         self.softmax = softmax
 
@@ -58,7 +58,7 @@ class Network:
 
         return action
 
-    def update_weights(self, batch: tuple, gamma: float, target_network: network):
+    def update_weights(self, batch: tuple, gamma: float, target_network):
         criterion = torch.nn.MSELoss()
 
         optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
@@ -77,7 +77,7 @@ class Network:
         curr_Q = self.network(X).gather(1, actions.unsqueeze(1)).to(self.device)
         curr_Q = curr_Q.squeeze(1)
         with torch.no_grad():
-            next_Q = target_network(X_next).to(self.device)
+            next_Q = target_network.network(X_next).to(self.device)
         max_next_Q = torch.max(next_Q, 1)[0]
         expected_Q = (rewards + gamma * max_next_Q).to(self.device)
 
@@ -89,5 +89,5 @@ class Network:
         # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
         optimizer.step()
 
-    def take_weights(self, model_network: network):
+    def take_weights(self, model_network):
         self.network.load_state_dict(model_network.state_dict())

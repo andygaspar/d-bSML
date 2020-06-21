@@ -4,6 +4,7 @@ from Players.randomPlayer import RandomPlayer
 from GameTraining.gameTraining import GameTraining
 from Game.game import Game
 from time import time
+import numpy as np
 
 
 def network_experience(game: GameTraining, num_games: int, get_wins: bool = False):
@@ -17,23 +18,24 @@ def network_experience(game: GameTraining, num_games: int, get_wins: bool = Fals
 
 
 def training_cycle(game: GameTraining, num_games: int):
-    #losses = []
-    eps = []
+    losses = []
     interval: int = 100
+    t = time()
     for i in range(num_games):
         game.play(train=True)
-        #losses.append(game.players[1].network.loss)
-        eps.append(game.players[1].eps_greedy_value)
+        losses.append(game.players[1].model_network.loss)
         game.reset()
-        #if i % interval == 0:
-        #    print("Mean loss in previous " + str(interval) + " games ", np.mean(losses))
-        #    losses = []
+        if i % interval == 0:
+            print("time: ", str(int((time() - t) / 60)) + "min " + str(int(((time() - t) % 60) * 60)) + "s"
+                  , "    ieter: ", i)
+            t=time()
+            print("Mean loss in previous " + str(interval) + " games ", np.mean(losses))
+            losses = []
         game.players[1].update_eps(i)
-    return eps
 
 #ReplayMemory Params
-SAMPLE_SIZE = 20
-CAPACITY = 3_000
+SAMPLE_SIZE = 3_000
+CAPACITY = 30_000
 UPDATE_STEP = 1
 
 #
@@ -51,7 +53,7 @@ FIXED_BATCH = False
 only_valid_moves = True
 EPS_GREEDY_VALUE = 0.
 SOFTMAX = False
-NUM_GAMES = 1_000
+NUM_GAMES = 10_000
 EPS_MIN: float = 0.01
 DECAY: float = 0.001
 DOUBLE_Q_LEARNING: bool = False
@@ -64,32 +66,32 @@ trainer = AITrainer(2, boardsize, HIDDEN, REWARD_NO_SCORE, REWARD_SCORE, REWARD_
                     fixed_batch=FIXED_BATCH, eps_greedy_value=EPS_GREEDY_VALUE, softmax=SOFTMAX,
                     double_Q_learning=DOUBLE_Q_LEARNING)
 
+import os
+print(os.getcwd())
 players = [RandomPlayer(1, boardsize), trainer]
+trainer.replayMemory.import_memory("Gym/")
 game = GameTraining(players, boardsize)
 
-network_experience(game, 20, get_wins=False)
 
-#t = time()
-#training_cycle(game, NUM_GAMES)
-#network_experience(game, 1_000, get_wins=True)
 
-#print("time: ", str(int((time() - t) / 60)) + ": " + str(int(((time() - t) % 60) * 60)))
+tt = time()
+training_cycle(game, NUM_GAMES)
+print("global time: ", str(int((time() - tt) / 60)) + "min " + str(int(((time() - tt) % 60) * 60)) + "s")
 
-#AI = players[1].get_trained_player(1)
+AI = players[1].get_trained_player(1)
 
-#test_players = [players[0], AI]
-#test_match = Game(test_players, boardsize)
-#num_games = 1
-#wins = 0
+test_players = [players[0], AI]
+test_match = Game(test_players, boardsize)
+wins = 0
 
-#start = time()
-#for j in range(10):
-#    for i in range(num_games):
-#        test_match.play()
-#        wins += int(test_players[1].score >= test_players[0].score)
-#        test_match.reset()
+start = time()
 
-#    print("win rate: ", wins / (num_games * (j + 1)))
-#    print("end: ", time() - start)
+for i in range(NUM_GAMES//100):
+   test_match.play()
+   wins += int(test_players[1].score >= test_players[0].score)
+   test_match.reset()
+
+print("win rate: ", wins / (NUM_GAMES//100))
+print("playing time: ", time() - start)
 
 #network_experience(game, 3_000)

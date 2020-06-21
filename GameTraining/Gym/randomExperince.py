@@ -28,8 +28,8 @@ only_valid_moves = True
 
 
 def inital_memory_genereator(size: int):
-    SAMPLE_SIZE = 300_000
-    CAPACITY = 300_000
+    SAMPLE_SIZE = 3_000
+    CAPACITY = 30_000
     UPDATE_STEP = 1
     HIDDEN = 100
     GAMMA = 0.5
@@ -66,18 +66,13 @@ def inital_memory_genereator(size: int):
     #     game.play(train=False)
     #     game.reset()
     #     if i%1000 == 0: print("partite giocate ", i)
-    # print(player1.replayMemory.actions)
-    player1.replayMemory.import_memory()
-    print("ciccio")
-
-
-    # print(player2.replayMemory.nextStates)
+    #
     # player1.replayMemory.export_memory()
     # player2.replayMemory.export_memory()
+    #player1.replayMemory.import_memory()
+    print("ciccio")
+
+inital_memory_genereator(3000)
 
 
-import os
-
-inital_memory_genereator(1)
-print(os.getcwd())
 

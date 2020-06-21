@@ -58,28 +58,38 @@ class ReplayMemory:
             csv_writer = writer(write_obj)
             csv_writer.writerow(self.rewards)
 
-    def import_memory(self):
+    def import_memory(self, path):
+
         import csv
-        with open("replay_memory/states.csv") as csv_file:
+        states = []
+        with open(path+"replay_memory/states.csv") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
             for state in csv_reader:
-                self.states.append(np.array(state))
+                states.append(np.array(state))
 
-        with open("replay_memory/next_states.csv") as csv_file:
+        next_states = []
+        with open(path+"replay_memory/next_states.csv") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
             for next_state in csv_reader:
-                self.nextStates.append(np.array(next_state))
+                next_states.append(np.array(next_state))
 
-        with open("replay_memory/rewards.csv") as csv_file:
+        with open(path+"replay_memory/rewards.csv") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
             reward = []
             for rew in csv_reader:
                 reward += rew
-            self.rewards = reward
 
-        with open("replay_memory/actions.csv") as csv_file:
+        with open(path+"replay_memory/actions.csv") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
             actions = []
             for acts in csv_reader:
                 actions += acts
-            self.actions = np.array(actions).astype(int).tolist()
+            actions = np.array(actions).astype(int).tolist()
+
+        random_idx = np.random.choice(range(len(states)), size=self.capacity, replace=False).astype(int)
+        self.states = [states[i] for i in random_idx]
+        self.nextStates = [next_states[i] for i in random_idx]
+        self.rewards = [reward[i] for i in random_idx]
+        self.actions = [actions[i] for i in random_idx]
+        self.size = len(self.states)
+

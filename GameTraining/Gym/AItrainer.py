@@ -48,7 +48,7 @@ class AITrainer(Player):
         self.rewardWinning = rewardWinning
         self.rewardLosing = rewardLosing
         self.model_network = Network(boardsize, hidden, only_valid, softmax)
-        self.target_network = Network(boardsize, hidden, only_valid, softmax) if double_Q_learning else None
+        self.target_network = Network(boardsize, hidden, only_valid, softmax)
         self.state = None
         self.action = None
         self.invalid = False
