@@ -5,6 +5,7 @@ from IPython import display
 
 
 class Network:
+    device: torch.device
     inputDimension: int  # dimensions
     hidden: int
     network: torch.nn.Sequential
@@ -12,6 +13,7 @@ class Network:
     softmax: bool
 
     def __init__(self, boardsize: int, hidden: int, ony_valid_actions: bool, softmax: bool):
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.loss = 0
         self.inputDimension = (2 * boardsize + 2) * boardsize  # dimensions
         self.hidden = hidden
@@ -41,9 +43,9 @@ class Network:
             return torch.argmax(torch.flatten(Q_values)).item()
 
     def get_action(self, state: np.array) -> int:
-        X = torch.from_numpy(state).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state)
+        X = torch.from_numpy(state).to(self.device).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state)
         with torch.no_grad():
-            Q_values = torch.flatten(self.network(X))
+            Q_values = torch.flatten(self.network(X)).to(self.device)
 
         action = self.sample_action(Q_values)
 
@@ -54,25 +56,26 @@ class Network:
 
         return action
 
-    def update_weights(self, batch: tuple, gamma: float):
+    def update_weights(self, batch: tuple, gamma: float, target_network: network):
         criterion = torch.nn.MSELoss()
 
         optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
         # optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
 
         states, actions, nextStates, rewards = batch
-        X = torch.tensor([el.tolist() for el in states]).reshape(len(states), self.inputDimension) / len(states[0])
-        X_next = torch.tensor([el.tolist() for el in nextStates]).reshape(len(nextStates), self.inputDimension) / len(
+        X = torch.tensor([el.tolist() for el in states]).to(self.device).reshape(len(states), self.inputDimension) / len(states[0])
+        X_next = torch.tensor([el.tolist() for el in nextStates]).to(self.device).reshape(len(nextStates), self.inputDimension) / len(
             states[0])
 
-        actions = torch.tensor(actions)
-        rewards = torch.tensor(rewards)
+        actions = torch.tensor(actions).to(self.device)
+        rewards = torch.tensor(rewards).to(self.device)
 
-        curr_Q = self.network(X).gather(1, actions.unsqueeze(1))
+        curr_Q = self.network(X).gather(1, actions.unsqueeze(1)).to(self.device)
         curr_Q = curr_Q.squeeze(1)
-        next_Q = self.network(X_next)
+        with torch.no_grad():
+            next_Q = target_network(X_next).to(self.device)
         max_next_Q = torch.max(next_Q, 1)[0]
-        expected_Q = rewards + gamma * max_next_Q
+        expected_Q = (rewards + gamma * max_next_Q).to(self.device)
 
         loss = criterion(curr_Q, expected_Q.detach())
         self.loss = loss.item()
@@ -82,5 +85,5 @@ class Network:
         # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
         optimizer.step()
 
-    def save_weights(self):
-        torch.save(self.network.state_dict(), 'prova.pt')
+    def take_weights(self, model_network: network):
+        self.network.load_state_dict(model_network.state_dict())

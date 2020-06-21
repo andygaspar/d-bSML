@@ -48,20 +48,21 @@ REWARD_SCORES_IN_ROW: float = 0
 REWARD_WIN = 50
 REWARD_LOSE = -50
 FIXED_BATCH = False
-EPS_GREEDY_VALUE = 1.
+only_valid_moves = True
+EPS_GREEDY_VALUE = 0.
 SOFTMAX = False
 NUM_GAMES = 1_000
 EPS_MIN: float = 0.01
 DECAY: float = 0.001
-
+DOUBLE_Q_LEARNING: bool = False
 
 boardsize = 3
-only_valid_moves = True
 
 trainer = AITrainer(2, boardsize, HIDDEN, REWARD_NO_SCORE, REWARD_SCORE, REWARD_OPPONENT_SCORE,
                     REWARD_INVALID_SCORE, REWARD_SCORES_IN_ROW, REWARD_WIN, REWARD_LOSE,
                     only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, NUM_GAMES, EPS_MIN, DECAY,
-                    fixed_batch=FIXED_BATCH, eps_greedy_value=EPS_GREEDY_VALUE, softmax=SOFTMAX)
+                    fixed_batch=FIXED_BATCH, eps_greedy_value=EPS_GREEDY_VALUE, softmax=SOFTMAX,
+                    double_Q_learning=DOUBLE_Q_LEARNING)
 
 players = [RandomPlayer(1, boardsize), trainer]
 game = GameTraining(players, boardsize)

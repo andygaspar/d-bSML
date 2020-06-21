@@ -41,7 +41,9 @@ class GameTraining:
             if newNumBoxes - self.numBoxes == 0:
                 if turn > 0:
                     currentPlayer.no_score_move()
-                    otherPlayer.add_record(self.board.vectorBoard, train)
+                    otherPlayer.add_record(self.board.vectorBoard)
+                    if train:
+                        otherPlayer.train_model_network()
 
                 PlayerTurn += 1
                 currentPlayer = self.players[PlayerTurn % 2]
@@ -56,8 +58,12 @@ class GameTraining:
             #print("Score: " + str([str(p)+" "+str(p.score) for p in self.players]))
         currentPlayer.endGameReward(currentPlayer.score > otherPlayer.score)
         otherPlayer.endGameReward(otherPlayer.score > currentPlayer.score)
-        currentPlayer.add_record(self.board.vectorBoard, train)
-        otherPlayer.add_record(self.board.vectorBoard, train)
+        currentPlayer.add_record(self.board.vectorBoard)
+        if train:
+            currentPlayer.train_model_network()
+        otherPlayer.add_record(self.board.vectorBoard)
+        if train:
+            otherPlayer.train_model_network()
 
     def reset(self):
         self.board = Board(self.boardsize)
