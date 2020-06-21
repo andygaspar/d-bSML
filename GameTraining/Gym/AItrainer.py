@@ -118,4 +118,4 @@ class AITrainer(Player):
         return "AI trainer player"
 
     def get_trained_player(self, id_number: int) -> AIPlayer:
-        return AIPlayer(id_number, self.boardsize, self.network, self.eps_greedy_value, self.softmax)
+        return AIPlayer(id_number, self.boardsize, self.network)

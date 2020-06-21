@@ -10,17 +10,13 @@ class AIPlayer(Player):
     score: int
     invalid: bool
     network: network
-    eps_greedy_value: float
-    softmax: bool
 
-    def __init__(self, id_number: int, boardsize: int, network: network, eps_greedy_value: float, softmax: bool):
+    def __init__(self, id_number: int, boardsize: int, network: network):
         super().__init__(id_number, boardsize)
         self.score = 0
         self.invalid = False
         self.network = network
         self.network.network.eval()
-        self.eps_greedy_value = eps_greedy_value
-        self.softmax = softmax
 
     def get_random_valid_move(self, state: np.array) -> int:
         self.invalid = False
@@ -28,13 +24,10 @@ class AIPlayer(Player):
         return np.random.choice(validMoves)
 
     def get_move(self, state: np.array) -> int:
-        if np.random.rand() < self.eps_greedy_value:
-            if not self.invalid:
-                return self.network.get_action(state)
-            else:
-                #or RaiseError?
-                return self.get_random_valid_move(state)
+        if not self.invalid:
+            return self.network.get_action(state)
         else:
+            #or RaiseError?
             return self.get_random_valid_move(state)
 
     def scored(self, newPoints: int):
