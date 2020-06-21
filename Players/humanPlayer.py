@@ -11,7 +11,7 @@ class HumanPlayer(Player):
 
     def get_move(self, board: np.array) -> int:
 
-        print("tocca a te, caro giocatore ", self.id)
+        print("Tocca a te, caro giocatore ", self.id)
 
         N = self.boardsize
 
@@ -27,7 +27,7 @@ class HumanPlayer(Player):
                     else:
                         print_err("Move already chosen, please try again\n")
                 else:
-                    print_err("Invalid Move, please try again\n")
+                    print_err("Invalid move, please try again\n")
             else:
                 vec_idx = row * (2 * N + 1) + col + N
                 if (row in range(0, N)) and (col in range(0, N + 1)):
