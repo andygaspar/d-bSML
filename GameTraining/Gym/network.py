@@ -43,7 +43,8 @@ class Network:
             return torch.argmax(torch.flatten(Q_values)).item()
 
     def get_action(self, state: np.array) -> int:
-        X = torch.from_numpy(state).to(self.device).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(state)
+        X = torch.from_numpy(state).to(self.device).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(
+            state)
         with torch.no_grad():
             Q_values = torch.flatten(self.network(X)).to(self.device)
 
@@ -63,8 +64,10 @@ class Network:
         # optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
 
         states, actions, nextStates, rewards = batch
-        X = torch.tensor([el.tolist() for el in states]).to(self.device).reshape(len(states), self.inputDimension) / len(states[0])
-        X_next = torch.tensor([el.tolist() for el in nextStates]).to(self.device).reshape(len(nextStates), self.inputDimension) / len(
+        X = torch.tensor([el.tolist() for el in states]).to(self.device).reshape(len(states),
+                                                                                 self.inputDimension) / len(states[0])
+        X_next = torch.tensor([el.tolist() for el in nextStates]).to(self.device).reshape(len(nextStates),
+                                                                                          self.inputDimension) / len(
             states[0])
 
         actions = torch.tensor(actions).to(self.device)

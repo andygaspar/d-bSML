@@ -41,3 +41,6 @@ class Player:
 
     def train_model_network(self):
         pass
+
+    def update_target_network(self):
+        pass

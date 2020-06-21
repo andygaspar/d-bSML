@@ -131,3 +131,6 @@ class AITrainer(Player):
 
     def update_eps(self, iteration: int):
         self.eps_greedy_value = self.eps_min + (1 - self.eps_min) * np.exp(- self.decay * iteration)
+
+    def update_target_network(self):
+        self.target_network.take_weights(self.model_network)
