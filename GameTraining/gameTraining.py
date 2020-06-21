@@ -5,8 +5,14 @@ from Players.player import Player
 
 
 class GameTraining:
+    boardsize: int
+    board: Board
+    numBoxes: int
+    players: List[Player]
+    learning_model_step: int
+    update_target_step: int
 
-    def __init__(self, players: List[Player], boardsize: int = 4):
+    def __init__(self, players: List[Player], boardsize: int = 4, learning_model_step: int =1,update_target_step: int = 1):
         self.boardsize = boardsize
         self.board = Board(self.boardsize)
         self.numBoxes = 0
@@ -22,9 +28,6 @@ class GameTraining:
         turn = 0
         PlayerTurn = 0
         N = self.board.size
-        newNumBoxes = 0
-
-        #self.board.print_board()
 
         while turn < (2 * N + 2) * N:
 
@@ -41,7 +44,9 @@ class GameTraining:
             if newNumBoxes - self.numBoxes == 0:
                 if turn > 0:
                     currentPlayer.no_score_move()
-                    otherPlayer.add_record(self.board.vectorBoard, train)
+                    otherPlayer.add_record(self.board.vectorBoard)
+                    if train:
+                        otherPlayer.train_model_network()
 
                 PlayerTurn += 1
                 currentPlayer = self.players[PlayerTurn % 2]
@@ -52,12 +57,17 @@ class GameTraining:
                 otherPlayer.opponentScored(newNumBoxes - self.numBoxes)
 
             turn += 1
+
             #self.board.print_board()
             #print("Score: " + str([str(p)+" "+str(p.score) for p in self.players]))
         currentPlayer.endGameReward(currentPlayer.score > otherPlayer.score)
         otherPlayer.endGameReward(otherPlayer.score > currentPlayer.score)
-        currentPlayer.add_record(self.board.vectorBoard, train)
-        otherPlayer.add_record(self.board.vectorBoard, train)
+        currentPlayer.add_record(self.board.vectorBoard)
+        otherPlayer.add_record(self.board.vectorBoard)
+        if train:
+            currentPlayer.train_model_network()
+        if train:
+            otherPlayer.train_model_network()
 
     def reset(self):
         self.board = Board(self.boardsize)
