@@ -18,6 +18,7 @@ class GameTraining:
     def play(self, train: bool):
 
         currentPlayer = self.players[0]
+        currentPlayer.state = self.board.vectorBoard.copy()
         otherPlayer = self.players[1]
         turn = 0
         PlayerTurn = 0

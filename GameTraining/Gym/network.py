@@ -13,6 +13,7 @@ class Network:
 
     def __init__(self, boardsize: int, hidden: int, ony_valid_actions: bool, softmax: bool):
         self.loss = 0
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.inputDimension = (2 * boardsize + 2) * boardsize  # dimensions
         self.hidden = hidden
         self.network = nn.Sequential(
