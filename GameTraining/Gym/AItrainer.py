@@ -25,11 +25,14 @@ class AITrainer(Player):
     fixed_batch: bool
     eps_greedy_value: float
     softmax: bool
+    numgames: int
+    eps_min: int
+    decay: float
 
     def __init__(self, id_number: int, boardsize: int, hidden: int,
                  rewardNoScore: float, rewardScored: float, rewardOpponentScored: float, rewardInvalidMove: float,
                  rewardScoresInRow: float, rewardWinning: float, rewardLosing: float, only_valid: bool,
-                 sample_size: int, capacity: int, gamma: float,
+                 sample_size: int, capacity: int, gamma: float, numgames: int, eps_min: float, decay: float,
                  fixed_batch: bool = False, eps_greedy_value: float = 1., softmax: bool = False):
 
         super().__init__(id_number, boardsize)
@@ -50,7 +53,10 @@ class AITrainer(Player):
         self.gamma = gamma
         self.fixed_batch = fixed_batch
         self.eps_greedy_value = eps_greedy_value
+        self.eps_min = eps_min
+        self.decay = decay
         self.softmax = softmax
+        self.numgames = numgames
 
     def get_random_valid_move(self, state: np.array) -> int:
         self.invalid = False
@@ -60,7 +66,7 @@ class AITrainer(Player):
 
     def get_move(self, state: np.array) -> int:
         self.state = state.copy()
-        if np.random.rand() < self.eps_greedy_value:
+        if np.random.rand() > self.eps_greedy_value:
             if not self.invalid:
                 self.action = self.network.get_action(state)
                 return self.action
@@ -119,3 +125,6 @@ class AITrainer(Player):
 
     def get_trained_player(self, id_number: int) -> AIPlayer:
         return AIPlayer(id_number, self.boardsize, self.network)
+
+    def update_eps(self, iteration: int):
+        self.eps_greedy_value = self.eps_min + (1 - self.eps_min) * np.exp(- self.decay * iteration)
