@@ -81,6 +81,9 @@ class AITrainer(Player):
         else:
             return self.get_random_valid_move(state)
 
+    def update_eps(self, iteration: int):
+        self.eps_greedy_value = self.eps_min + (1 - self.eps_min) * np.exp(- self.decay * iteration)
+
     def no_score_move(self):
         self.rewardScoresInRow = 0
         self.current_reward += self.rewardNoScore
@@ -123,14 +126,11 @@ class AITrainer(Player):
             return
         self.model_network.update_weights(self.replayMemory.get_sample(), self.gamma, self.target_network)
 
-    def __str__(self):
-        return "AI trainer player"
+    def update_target_network(self):
+        self.target_network.take_weights(self.model_network)
 
     def get_trained_player(self, id_number: int) -> AIPlayer:
         return AIPlayer(id_number, self.boardsize, self.model_network)
 
-    def update_eps(self, iteration: int):
-        self.eps_greedy_value = self.eps_min + (1 - self.eps_min) * np.exp(- self.decay * iteration)
-
-    def update_target_network(self):
-        self.target_network.take_weights(self.model_network)
+    def __str__(self):
+        return "AI trainer player"
