@@ -9,8 +9,8 @@ class RandomPlayer(Player):
         super().__init__(id, boardsize)
         # np.random.seed(2)
 
-    def get_move(self, state: np.array) -> int:
-        validMoves = np.flatnonzero(state == 0)
+    def get_move(self, board: np.array) -> int:
+        validMoves = np.flatnonzero(board == 0)
         return np.random.choice(validMoves)
 
     def scored(self, newPoints: int):

@@ -30,11 +30,17 @@ class Player:
     def invalidMove(self):
         pass
 
-    def add_record(self, next_game_state: np.array, train: bool):
+    def add_record(self, next_game_state: np.array) -> None:
         pass
 
     def endGameReward(self, win: bool):
         pass
 
     def update_eps(self, i: int):
+        pass
+
+    def train_model_network(self):
+        pass
+
+    def update_target_network(self):
         pass
