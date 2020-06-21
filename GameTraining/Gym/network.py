@@ -1,5 +1,3 @@
-from Game.board import Board
-from GameTraining.Gym.replayMemory import ReplayMemory
 import numpy as np
 import torch
 from torch import nn, optim
@@ -18,12 +16,19 @@ class Network:
         self.inputDimension = (2 * boardsize + 2) * boardsize  # dimensions
         self.hidden = hidden
         self.network = nn.Sequential(
-            nn.Linear(self.inputDimension, self.hidden),
+            nn.Linear(self.inputDimension, self.inputDimension * 2),
             nn.ReLU(),
-            nn.Linear(self.hidden, self.hidden // 2),
+            nn.Linear(self.inputDimension * 2, self.inputDimension * 3),
             nn.ReLU(),
-            nn.Linear(self.hidden // 2, self.inputDimension)
+            nn.Linear(self.inputDimension * 3, self.inputDimension * 2),
+            nn.ReLU(),
+            nn.Linear(self.inputDimension * 2, self.inputDimension),
+            nn.ReLU(),
+            nn.Linear(self.inputDimension, self.inputDimension),
         )
+        self.network.to(self.device)
+        torch.cuda.current_device()
+        print(torch.cuda.is_available())
         self.only_valid_actions = ony_valid_actions
         self.softmax = softmax
 

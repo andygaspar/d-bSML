@@ -4,8 +4,6 @@ from Players.randomPlayer import RandomPlayer
 from GameTraining.gameTraining import GameTraining
 from Game.game import Game
 from time import time
-import numpy as np
-from matplotlib import pyplot as plt
 
 
 def network_experience(game: GameTraining, num_games: int, get_wins: bool = False):
@@ -37,6 +35,8 @@ def training_cycle(game: GameTraining, num_games: int):
 SAMPLE_SIZE = 20
 CAPACITY = 3_000
 UPDATE_STEP = 1
+
+#
 HIDDEN = 100
 GAMMA = 0.5
 
@@ -92,7 +92,3 @@ network_experience(game, 20, get_wins=False)
 #    print("end: ", time() - start)
 
 #network_experience(game, 3_000)
-
-#eps = training_cycle(game, 10_000)
-#plt.plot(eps)
-#plt.show()
