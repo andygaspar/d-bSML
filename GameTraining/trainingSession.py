@@ -42,7 +42,7 @@ CAPACITY = 1_000
 HIDDEN = 50
 GAMMA = 0.9
 
-REWARD_NO_SCORE: float = 0.5
+REWARD_NO_SCORE: float = 0
 REWARD_SCORE: float = 10
 REWARD_OPPONENT_SCORE: float = -5
 REWARD_INVALID_SCORE: float = -1000
@@ -53,7 +53,7 @@ FIXED_BATCH = False
 only_valid_moves = True
 EPS_GREEDY_VALUE = 0.1
 SOFTMAX = True
-NUM_GAMES = 10_000
+NUM_GAMES = 1_000
 EPS_MIN: float = 0.01
 DECAY: float = 0.0001
 DOUBLE_Q_LEARNING: bool = True
@@ -82,14 +82,15 @@ test_players = [players[0], AI]
 test_match = Game(test_players, boardsize)
 wins = 0
 
+test_plays = 1_000
 start = time()
 
-for i in range(10_000):
+for i in range(test_plays):
    test_match.play()
    wins += int(test_players[1].score >= test_players[0].score)
    test_match.reset()
 
-print("win rate: ", wins / 10_000)
-print("playing time: ", time() - start)
+print("win rate: ", wins / test_plays)
+print("playing time: ", str(int((time() - start) / 60)) + "min " + str(int((time() - start) % 60)) + "s")
 
 #network_experience(game, 3_000)

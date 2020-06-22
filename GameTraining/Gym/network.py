@@ -88,7 +88,7 @@ class Network:
         display.clear_output(wait=True)
         self.optimizer.zero_grad()
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
+        # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
         self.optimizer.step()
 
     def take_weights(self, model_network):
