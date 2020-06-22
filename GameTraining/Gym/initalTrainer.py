@@ -19,8 +19,8 @@ class InitialTrainer(AITrainer):
         self.action = np.random.choice(validMoves)
         return self.action
 
-    def add_record(self, nextState: np.array):
-        self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward)
+    def add_record(self, nextState: np.array, done: bool):
+        self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward, self.done)
         self.current_reward = 0
 
     def __str__(self):

@@ -9,6 +9,7 @@ class ReplayMemory:
     actions: List[int]
     nextStates: List[np.array]
     rewards: List[float]
+    dones: List[bool]
     sampleSize: int
     capacity: int
 
@@ -18,26 +19,30 @@ class ReplayMemory:
         self.actions = []
         self.nextStates = []
         self.rewards = []
+        self.dones = []
         self.sampleSize = sample_size
         self.capacity = capacity
 
-    def add_record(self, state: np.array, action: int, nextState: np.array, reward: float):
+    def add_record(self, state: np.array, action: int, nextState: np.array, reward: float, done: bool):
         if len(self.actions) >= self.capacity:
             self.states = self.states[1:]
             self.actions = self.actions[1:]
             self.nextStates = self.nextStates[1:]
             self.rewards = self.rewards[1:]
+            self.dones = self.dones[1:]
             self.size -= 1
         self.states.append(state)
         self.actions.append(action)
         self.nextStates.append(nextState)
         self.rewards.append(reward)
+        self.dones.append(done)
         self.size += 1
 
     def get_sample(self):
         random_idx = np.random.choice(range(self.size), size=self.sampleSize, replace=False).astype(int)
         return [self.states[i] for i in random_idx], [self.actions[i] for i in random_idx], \
-               [self.nextStates[i] for i in random_idx], [self.rewards[i] for i in random_idx]
+               [self.nextStates[i] for i in random_idx], [self.rewards[i] for i in random_idx], \
+               [self.dones[i] for i in random_idx]
 
     def export_memory(self):
         with open("replay_memory/states.csv", 'a+', newline='') as write_obj:
@@ -58,38 +63,48 @@ class ReplayMemory:
             csv_writer = writer(write_obj)
             csv_writer.writerow(self.rewards)
 
-    def import_memory(self, path):
+        with open("replay_memory/dones.csv", 'a+', newline='') as write_obj:
+            csv_writer = writer(write_obj)
+            csv_writer.writerow(self.dones)
 
+    def import_memory(self, path):
         import csv
         states = []
-        with open(path+"replay_memory/states.csv") as csv_file:
+        with open(path + "replay_memory/states.csv") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
             for state in csv_reader:
                 states.append(np.array(state))
 
         next_states = []
-        with open(path+"replay_memory/next_states.csv") as csv_file:
+        with open(path + "replay_memory/next_states.csv") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
             for next_state in csv_reader:
                 next_states.append(np.array(next_state))
 
-        with open(path+"replay_memory/rewards.csv") as csv_file:
+        with open(path + "replay_memory/rewards.csv") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
             reward = []
             for rew in csv_reader:
                 reward += rew
 
-        with open(path+"replay_memory/actions.csv") as csv_file:
+        with open(path + "replay_memory/actions.csv") as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
             actions = []
             for acts in csv_reader:
                 actions += acts
             actions = np.array(actions).astype(int).tolist()
 
+        with open(path + "replay_memory/dones.csv") as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC)
+            dones = []
+            for done in csv_reader:
+                dones += done
+            actions = np.array(dones).astype(bool).tolist()
+
         random_idx = np.random.choice(range(len(states)), size=self.capacity, replace=False).astype(int)
         self.states = [states[i] for i in random_idx]
         self.nextStates = [next_states[i] for i in random_idx]
         self.rewards = [reward[i] for i in random_idx]
         self.actions = [actions[i] for i in random_idx]
+        self.dones = [dones[i] for i in random_idx]
         self.size = len(self.states)
-

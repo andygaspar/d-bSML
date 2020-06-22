@@ -30,7 +30,7 @@ class Player:
     def invalidMove(self):
         pass
 
-    def add_record(self, next_game_state: np.array) -> None:
+    def add_record(self, next_game_state: np.array, done: bool) -> None:
         pass
 
     def endGameReward(self, win: bool):

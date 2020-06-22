@@ -1,5 +1,5 @@
 from typing import List
-
+import numpy as np
 from Game.board import Board
 from Players.player import Player
 
@@ -29,7 +29,6 @@ class GameTraining:
         turn = 0
         PlayerTurn = 0
         N = self.board.size
-
         while turn < (2 * N + 2) * N:
 
             action = currentPlayer.get_move(self.board.vectorBoard)
@@ -45,7 +44,7 @@ class GameTraining:
             if newNumBoxes - self.numBoxes == 0:
                 if turn > 0:
                     currentPlayer.no_score_move()
-                    otherPlayer.add_record(self.board.vectorBoard)
+                    otherPlayer.add_record(self.board.vectorBoard, np.count_nonzero(self.board.vectorBoard) == len(self.board.vectorBoard))
                     if train:
                         otherPlayer.train_model_network()
 
@@ -63,8 +62,6 @@ class GameTraining:
             #print("Score: " + str([str(p)+" "+str(p.score) for p in self.players]))
         currentPlayer.endGameReward(currentPlayer.score > otherPlayer.score)
         otherPlayer.endGameReward(otherPlayer.score > currentPlayer.score)
-        currentPlayer.add_record(self.board.vectorBoard)
-        otherPlayer.add_record(self.board.vectorBoard)
         if train:
             currentPlayer.train_model_network()
         if train:

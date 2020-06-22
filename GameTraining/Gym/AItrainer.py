@@ -27,23 +27,19 @@ class AITrainer(Player):
     eps_greedy_value: float
     softmax: bool
     numgames: int
-    eps_min: int
+    eps_min: float
     decay: float
     double_Q_learning: bool
 
-    def __init__(self, id_number: int, boardsize: int, hidden: int,
-                 rewardNoScore: float, rewardScored: float, rewardOpponentScored: float, rewardInvalidMove: float,
-                 rewardScoresInRow: float, rewardWinning: float, rewardLosing: float, only_valid: bool,
-                 sample_size: int, capacity: int, gamma: float, numgames: int, eps_min: float, decay: float,
-                 fixed_batch: bool = False, softmax: bool = False,
-                 double_Q_learning: bool = False):
+    def __init__(self, id_number: int, boardsize: int, hidden: int, rewardScored: float, rewardInvalidMove: float,
+                 rewardWinning: float, rewardLosing: float, only_valid: bool, sample_size: int, capacity: int,
+                 gamma: float, numgames: int, eps_min: float, decay: float, fixed_batch: bool = False,
+                 softmax: bool = False, double_Q_learning: bool = False):
 
         super().__init__(id_number, boardsize)
-        self.rewardNoScore = rewardNoScore
+        self.rewardNoScore = 0
         self.rewardInvalidMove = rewardInvalidMove
         self.rewardScored = rewardScored
-        self.rewardOpponentScored = rewardOpponentScored
-        self.rewardScoresInRow = rewardScoresInRow
         self.rewardWinning = rewardWinning
         self.rewardLosing = rewardLosing
         self.model_network = Network(boardsize, hidden, only_valid, softmax)
@@ -89,20 +85,7 @@ class AITrainer(Player):
 
     def scored(self, newPoints: int):
         self.score += newPoints
-        bonus_points_in_a_row = self.rewardScoresInRow * self.rewardScored
-        self.current_reward += newPoints * self.rewardScored + bonus_points_in_a_row
-        if newPoints > 1:
-            bonus_multiple_points_at_once = newPoints * self.rewardScored
-            self.current_reward += bonus_multiple_points_at_once
-        self.rewardScoresInRow += 1
-
-    def opponentScored(self, newPoints: int):
-        bonus_points_in_a_row = self.rewardScoresInRow * self.rewardOpponentScored
-        self.current_reward += newPoints * self.rewardOpponentScored + bonus_points_in_a_row
-        if newPoints > 1:
-            bonus_multiple_points_at_once = newPoints * self.rewardOpponentScored
-            self.current_reward += bonus_multiple_points_at_once
-        self.rewardScoresInRow += 1
+        self.current_reward += newPoints * self.rewardScored
 
     def invalidMove(self):
         self.invalid = True
@@ -114,12 +97,12 @@ class AITrainer(Player):
         else:
             self.current_reward += - self.rewardLosing
 
-    def add_record(self, nextState: np.array):
+    def add_record(self, nextState: np.array, done: bool):
         if self.fixed_batch:
             if self.replayMemory.size < self.replayMemory.sampleSize:
-                self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward)
+                self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward, done)
         else:
-            self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward)
+            self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward, done)
         self.current_reward = 0
 
     def train_model_network(self):
