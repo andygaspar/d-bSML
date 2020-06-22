@@ -51,7 +51,6 @@ class Network:
         X = torch.from_numpy(state).to(self.device).reshape(1, self.inputDimension).type(dtype=torch.float32)
         with torch.no_grad():
             Q_values = torch.flatten(self.network(X)).to(self.device)
-
         action = self.sample_action(Q_values)
 
         if self.only_valid_actions:
