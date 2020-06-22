@@ -34,14 +34,19 @@ class Network:
         # print(torch.cuda.is_available())
         self.only_valid_actions = ony_valid_actions
         self.softmax = softmax
+        self.optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
+        #self.optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
+
 
     def sample_action(self, Q_values: torch.tensor) -> int:
         if self.softmax:
-            Q_values_probabilities = Q_values.softmax(0).flatten().tolist()
-            action = np.random.choice(range(len(Q_values)), size=1, p=Q_values_probabilities)
+            Q_values = Q_values.softmax(0).flatten().numpy()
+            Q_values_probabilities = Q_values / np.sum(Q_values)
+            action = np.random.choice(range(len(Q_values_probabilities)), size=1, p=Q_values_probabilities)
             return action
         else:
             return torch.argmax(torch.flatten(Q_values)).item()
+
 
     def get_action(self, state: np.array) -> int:
         X = torch.from_numpy(state).to(self.device).reshape(1, self.inputDimension).type(dtype=torch.float32) / len(
@@ -60,9 +65,6 @@ class Network:
 
     def update_weights(self, batch: tuple, gamma: float, target_network):
         criterion = torch.nn.MSELoss()
-
-        optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
-        # optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
 
         states, actions, nextStates, rewards = batch
         X = torch.tensor([el.tolist() for el in states]).to(self.device).reshape(len(states),
@@ -84,10 +86,13 @@ class Network:
         loss = criterion(curr_Q, expected_Q.detach())
         self.loss = loss.item()
         display.clear_output(wait=True)
-        optimizer.zero_grad()
+        self.optimizer.zero_grad()
         loss.backward()
         # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
-        optimizer.step()
+        self.optimizer.step()
 
     def take_weights(self, model_network):
         self.network.load_state_dict(model_network.state_dict())
+
+    def save_weights(self, filename: str):
+        torch.save(self.network.state_dict(), filename + '.pt')
