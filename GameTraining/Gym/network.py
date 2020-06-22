@@ -13,6 +13,7 @@ class Network:
     softmax: bool
 
     def __init__(self, boardsize: int, hidden: int, ony_valid_actions: bool, softmax: bool):
+
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.loss = 0
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -28,17 +29,26 @@ class Network:
             nn.Linear(self.inputDimension * 2, self.inputDimension),
             nn.ReLU(),
             nn.Linear(self.inputDimension, self.inputDimension),
+            nn.ReLU(),
+            nn.Linear(self.inputDimension , self.inputDimension),
+            nn.ReLU(),
+            nn.Linear(self.inputDimension, self.inputDimension),
+            nn.ReLU(),
+            nn.Linear(self.inputDimension, self.inputDimension),
+            nn.ReLU(),
+            nn.Linear(self.inputDimension, self.inputDimension),
         )
         self.network.to(self.device)
         # torch.cuda.current_device()
         # print(torch.cuda.is_available())
         self.only_valid_actions = ony_valid_actions
         self.softmax = softmax
+        self.optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
 
     def sample_action(self, Q_values: torch.tensor) -> int:
         if self.softmax:
-            Q_values_probabilities = Q_values.softmax(0).flatten().tolist()
-            action = np.random.choice(range(len(Q_values)), size=1, p=Q_values_probabilities)
+            Q_values_probabilities = np.array(Q_values.softmax(0).flatten().tolist())
+            action = np.random.choice(range(len(Q_values)), size=1, p=Q_values_probabilities/sum(Q_values_probabilities))
             return action
         else:
             return torch.argmax(torch.flatten(Q_values)).item()
@@ -61,8 +71,8 @@ class Network:
     def update_weights(self, batch: tuple, gamma: float, target_network):
         criterion = torch.nn.MSELoss()
 
-        optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
-        # optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
+
+        #optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
 
         states, actions, nextStates, rewards = batch
         X = torch.tensor([el.tolist() for el in states]).to(self.device).reshape(len(states),
@@ -84,10 +94,12 @@ class Network:
         loss = criterion(curr_Q, expected_Q.detach())
         self.loss = loss.item()
         display.clear_output(wait=True)
-        optimizer.zero_grad()
+        self.optimizer.zero_grad()
         loss.backward()
-        # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
-        optimizer.step()
+        torch.nn.utils.clip_grad_norm_(self.network.parameters(), 1)
+        self.optimizer.step()
 
     def take_weights(self, model_network):
-        self.network.load_state_dict(model_network.state_dict())
+        self.network.load_state_dict(model_network.network.state_dict())
+
+
