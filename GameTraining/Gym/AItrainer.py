@@ -31,12 +31,11 @@ class AITrainer(Player):
     decay: float
     double_Q_learning: bool
 
-
     def __init__(self, id_number: int, boardsize: int, hidden: int,
                  rewardNoScore: float, rewardScored: float, rewardOpponentScored: float, rewardInvalidMove: float,
                  rewardScoresInRow: float, rewardWinning: float, rewardLosing: float, only_valid: bool,
                  sample_size: int, capacity: int, gamma: float, numgames: int, eps_min: float, decay: float,
-                 fixed_batch: bool = False, eps_greedy_value: float = 0., softmax: bool = False,
+                 fixed_batch: bool = False, softmax: bool = False,
                  double_Q_learning: bool = False):
 
         super().__init__(id_number, boardsize)
@@ -57,7 +56,7 @@ class AITrainer(Player):
         self.score = 0
         self.gamma = gamma
         self.fixed_batch = fixed_batch
-        self.eps_greedy_value = eps_greedy_value
+        self.eps_greedy_value = 1.
         self.eps_min = eps_min
         self.decay = decay
         self.softmax = softmax
