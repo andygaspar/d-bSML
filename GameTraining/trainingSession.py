@@ -1,10 +1,29 @@
 from GameTraining.Gym.AItrainer import AITrainer
+from Players.AIPlayer import AIPlayer
 from Players.randomPlayer import RandomPlayer
 from GameTraining.gameTraining import GameTraining
 from Game.game import Game
 from time import time
 import numpy as np
 
+def play_test(random_player, trained, num_games):
+    AI = AIPlayer(2, 3, trained.target_network)
+    test_players = [random_player, AI]
+    test_match = Game(test_players, boardsize)
+    wins = 0
+
+    start = time()
+    matches = num_games
+
+    for i in range(matches):
+        test_match.play()
+        wins += int(AI.score >= random_player.score)
+        test_match.reset()
+
+    print("win rate: ", wins / matches)
+    print("playing time: ", time() - start)
+
+    return(wins)
 
 def network_experience(game: GameTraining, num_games: int, get_wins: bool = False):
     wins = []
