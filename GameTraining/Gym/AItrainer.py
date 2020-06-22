@@ -98,10 +98,12 @@ class AITrainer(Player):
         self.rewardScoresInRow += 1
 
     def opponentScored(self, newPoints: int):
-        self.score += newPoints
-        self.current_reward += (newPoints * self.rewardOpponentScored +
-                                self.rewardScoresInRow * self.rewardOpponentScored) / 2
-        self.current_reward += self.rewardOpponentScored
+        bonus_points_in_a_row = self.rewardScoresInRow * self.rewardOpponentScored
+        self.current_reward += newPoints * self.rewardOpponentScored + bonus_points_in_a_row
+        if newPoints > 1:
+            bonus_multiple_points_at_once = newPoints * self.rewardOpponentScored
+            self.current_reward += bonus_multiple_points_at_once
+        self.rewardScoresInRow += 1
 
     def invalidMove(self):
         self.invalid = True

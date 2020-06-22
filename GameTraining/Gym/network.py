@@ -42,7 +42,7 @@ class Network:
         if self.softmax:
             Q_values = Q_values.softmax(0).flatten().numpy()
             Q_values_probabilities = Q_values / np.sum(Q_values)
-            action = np.random.choice(range(len(Q_values_probabilities)), size=1, p=Q_values_probabilities)
+            action = np.random.choice(range(len(Q_values_probabilities)), size=1, p=Q_values_probabilities)[0]
             return action
         else:
             return torch.argmax(torch.flatten(Q_values)).item()
@@ -88,11 +88,11 @@ class Network:
         display.clear_output(wait=True)
         self.optimizer.zero_grad()
         loss.backward()
-        # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
+        torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
         self.optimizer.step()
 
     def take_weights(self, model_network):
-        self.network.load_state_dict(model_network.state_dict())
+        self.network.load_state_dict(model_network.network.state_dict())
 
     def save_weights(self, filename: str):
-        torch.save(self.network.state_dict(), filename + '.pt')
+        torch.save(self.network.network.state_dict(), filename + '.pt')
