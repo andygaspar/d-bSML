@@ -95,7 +95,7 @@ class AITrainer(Player):
         if win:
             self.current_reward += self.rewardWinning
         else:
-            self.current_reward += - self.rewardLosing
+            self.current_reward += self.rewardLosing
 
     def add_record(self, nextState: np.array, done: bool):
         if self.fixed_batch:

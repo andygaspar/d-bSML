@@ -48,7 +48,7 @@ def training_cycle(game: GameTraining, update_target_every, num_games: int):
     random_player = game.players[0]
     for i in range(num_games):
         game.play(train=True)
-        losses.append(trainer.model_network.loss)
+        losses+=trainer.model_network.loss
         game.reset()
         #if i % 10 == 0:
         #    print(i, trainer.model_network.loss)

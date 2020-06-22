@@ -14,7 +14,7 @@ class Network:
 
     def __init__(self, boardsize: int, hidden: int, ony_valid_actions: bool, softmax: bool):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.loss = 0
+        self.loss = [0]
         self.inputDimension = (2 * boardsize + 2) * boardsize  # dimensions
         self.hidden = hidden
         self.network = nn.Sequential(
@@ -66,6 +66,9 @@ class Network:
         states, actions, nextStates, rewards, dones = batch
         minibatch_number = 5
         size = int(len(states) / minibatch_number)
+        self.loss = []
+        if sum(dones) > 0:
+            pass
         for i in range(minibatch_number):
 
             X = torch.tensor([el.tolist() for el in states[i * size:(i + 1) * size]]).to(self.device).\
@@ -78,13 +81,14 @@ class Network:
 
             curr_Q = self.network(X).gather(1, actions_new.unsqueeze(1)).to(self.device)
             curr_Q = curr_Q.squeeze(1)
+
             with torch.no_grad():
                 next_Q = target_network.network(X_next).to(self.device)
                 max_next_Q = torch.max(next_Q, 1)[0]
                 expected_Q = (rewards_new + (1 - dones_new) * gamma * max_next_Q).to(self.device)
 
             loss = criterion(curr_Q, expected_Q.detach())
-            self.loss = loss.item()
+            self.loss.append(loss.item())
             display.clear_output(wait=True)
             self.optimizer.zero_grad()
             loss.backward()
