@@ -65,6 +65,8 @@ class Network:
 
         states, actions, nextStates, rewards, dones = batch
         minibatch_number = 5
+        if sum(dones)>0:
+            pass
         size = int(len(states) / minibatch_number)
         self.loss = []
         if sum(dones) > 0:
