@@ -92,6 +92,9 @@ class AITrainer(Player):
         self.score += newPoints
         self.current_reward += newPoints * self.rewardScored
 
+    def opponentScored(self, newPoints: int):
+        self.current_reward -= newPoints * self.rewardScored
+
     def invalidMove(self):
         self.invalid = True
         self.current_reward += self.rewardInvalidMove

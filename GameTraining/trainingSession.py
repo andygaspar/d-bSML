@@ -2,6 +2,7 @@ from GameTraining.Gym.AItrainer import AITrainer
 from Players.AIPlayer import AIPlayer
 from Players.randomPlayer import RandomPlayer
 from Players.greedyPlayer import GreedyPlayer
+from Players.stupidPlayer import StupidPlayer
 from GameTraining.gameTraining import GameTraining
 from Game.game import Game
 from time import time
@@ -29,6 +30,7 @@ def play_test(player_tester, trained, num_games):
     return wins
 
 def training_cycle(game: GameTraining, num_games: int):
+    max_win_rate = 0
     losses = []
     win_rate = []
     losses_means = []
@@ -52,8 +54,12 @@ def training_cycle(game: GameTraining, num_games: int):
             losses_means.append(l_mean)
             losses = []
             trainer.model_network.save_weights("network")
-        if i % 200 == 0:
-            win_rate.append(play_test(random_player, trainer, 500))
+        if i % 500 == 0:
+            win_rate_current = play_test(random_player, trainer, 500)
+            win_rate.append(win_rate_current)
+            if win_rate_current > max_win_rate:
+                trainer.model_network.save_weights("pesi_rete_allenata")
+                max_win_rate = win_rate_current
 
         trainer.update_eps(i)
 
@@ -81,8 +87,8 @@ FIXED_BATCH = False
 only_valid_moves = True
 EPS_MIN: float = 0.01
 SOFTMAX = False
-NUM_GAMES = 5_000 #50_000
-EPS_DECAY: float = 0.001
+NUM_GAMES = 50_000 #50_000
+EPS_DECAY: float = 0.0001
 UPDATE_TARGET_EVERY = 20
 
 boardsize = 3
@@ -91,7 +97,7 @@ trainer = AITrainer(2, boardsize, HIDDEN, REWARD_SCORE, REWARD_INVALID_SCORE, RE
                     only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, NUM_GAMES, EPS_MIN, EPS_DECAY,
                     fixed_batch=FIXED_BATCH, softmax=SOFTMAX, double_q_interval=UPDATE_TARGET_EVERY)
 
-players = [GreedyPlayer(1, boardsize), trainer]
+players = [StupidPlayer(1, boardsize), trainer]
 trainer.otherPlayer = players[0]
 #trainer.replayMemory.import_memory("Gym/")
 game = GameTraining(players, boardsize)
