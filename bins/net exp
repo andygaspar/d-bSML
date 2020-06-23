@@ -1,0 +1,8 @@
+def network_experience(game: GameTraining, num_games: int, get_wins: bool = False):
+    wins = []
+    for i in range(num_games):
+        game.play(train=False)
+        if get_wins:
+            wins.append(players[1].score >= players[0].score)
+        game.reset()
+    if get_wins: print("win rate  ", sum(wins) / len(wins))

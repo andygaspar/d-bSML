@@ -1,16 +1,17 @@
 from GameTraining.Gym.AItrainer import AITrainer
 from Players.AIPlayer import AIPlayer
 from Players.randomPlayer import RandomPlayer
+from Players.greedyPlayer import GreedyPlayer
 from GameTraining.gameTraining import GameTraining
 from Game.game import Game
 from time import time
 import numpy as np
 
 
-def play_test(random_player, trained, num_games):
+def play_test(player_tester, trained, num_games):
     AI = AIPlayer(2, 3, trained.model_network)
-    AI.otherPlayer = random_player
-    test_players = [random_player, AI]
+    AI.otherPlayer = player_tester
+    test_players = [player_tester, AI]
     test_match = Game(test_players, boardsize)
     wins = 0
 
@@ -19,24 +20,13 @@ def play_test(random_player, trained, num_games):
 
     for i in range(matches):
         test_match.play()
-        wins += int(AI.score >= random_player.score)
+        wins += int(AI.score >= player_tester.score)
         test_match.reset()
 
     print("win rate: ", wins / matches)
     print("playing time: ", time() - start)
 
     return wins
-
-
-def network_experience(game: GameTraining, num_games: int, get_wins: bool = False):
-    wins = []
-    for i in range(num_games):
-        game.play(train=False)
-        if get_wins:
-            wins.append(players[1].score >= players[0].score)
-        game.reset()
-    if get_wins: print("win rate  ", sum(wins) / len(wins))
-
 
 def training_cycle(game: GameTraining, num_games: int):
     losses = []
@@ -62,7 +52,7 @@ def training_cycle(game: GameTraining, num_games: int):
             losses_means.append(l_mean)
             losses = []
             trainer.model_network.save_weights("network")
-        if i % 500 == 0:
+        if i % 200 == 0:
             win_rate.append(play_test(random_player, trainer, 500))
 
         trainer.update_eps(i)
@@ -101,7 +91,7 @@ trainer = AITrainer(2, boardsize, HIDDEN, REWARD_SCORE, REWARD_INVALID_SCORE, RE
                     only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, NUM_GAMES, EPS_MIN, EPS_DECAY,
                     fixed_batch=FIXED_BATCH, softmax=SOFTMAX, double_q_interval=UPDATE_TARGET_EVERY)
 
-players = [RandomPlayer(1, boardsize), trainer]
+players = [GreedyPlayer(1, boardsize), trainer]
 trainer.otherPlayer = players[0]
 #trainer.replayMemory.import_memory("Gym/")
 game = GameTraining(players, boardsize)
