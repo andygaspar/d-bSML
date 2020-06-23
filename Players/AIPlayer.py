@@ -1,9 +1,6 @@
-from Game.board import Board
 from Players.player import Player
-from GameTraining.Gym.replayMemory import ReplayMemory
 from GameTraining.Gym import network
 import numpy as np
-import torch
 
 
 class AIPlayer(Player):
@@ -16,8 +13,7 @@ class AIPlayer(Player):
         self.score = 0
         self.invalid = False
         self.network = network
-        self.network.network#.eval()
-        self.otherPlayer = None
+        #self.network.network.eval()
 
     def get_random_valid_move(self, state: np.array) -> int:
         self.invalid = False
@@ -28,7 +24,6 @@ class AIPlayer(Player):
         if not self.invalid:
             return self.network.get_action(np.append(state, self.score_value()))
         else:
-            #or RaiseError?
             return self.get_random_valid_move(state)
 
     def scored(self, newPoints: int):
@@ -38,7 +33,7 @@ class AIPlayer(Player):
         self.invalid = True
 
     def score_value(self):
-        return (self.score - self.otherPlayer.score) / self.boardsize ** 2
+        return self.score / self.boardsize ** 2
 
     def __str__(self):
         return "AI player"

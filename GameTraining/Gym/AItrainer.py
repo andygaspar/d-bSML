@@ -3,7 +3,6 @@ from Players.player import Player
 from GameTraining.Gym.network import Network
 import numpy as np
 from GameTraining.Gym.replayMemory import ReplayMemory
-from Game.board import Board
 
 
 class AITrainer(Player):
@@ -30,12 +29,13 @@ class AITrainer(Player):
     numgames: int
     eps_min: float
     decay: float
-    double_Q_learning: bool
+    double_q_interval: int
+    double_q_counter: int
 
     def __init__(self, id_number: int, boardsize: int, hidden: int, rewardScored: float, rewardInvalidMove: float,
                  rewardWinning: float, rewardLosing: float, only_valid: bool, sample_size: int, capacity: int,
                  gamma: float, numgames: int, eps_min: float, decay: float, fixed_batch: bool = False,
-                 softmax: bool = False, double_Q_learning: bool = False):
+                 softmax: bool = False, double_q_interval: int = 0):
 
         super().__init__(id_number, boardsize)
         self.rewardNoScore = 0
@@ -59,9 +59,8 @@ class AITrainer(Player):
         self.decay = decay
         self.softmax = softmax
         self.numgames = numgames
-        self.double_Q_learning = double_Q_learning
-
-        self.otherPlayer = None
+        self.double_q_interval = double_q_interval
+        self.double_q_counter = 0
 
     def get_random_valid_move(self, state: np.array) -> int:
         self.invalid = False
@@ -121,20 +120,26 @@ class AITrainer(Player):
     def train_model_network(self):
         if self.replayMemory.size < self.replayMemory.sampleSize:
             return
-        states, actions, nexstates, rewards, dones = self.replayMemory.get_sample()
-        size = len(states) // 5
         for i in range(5):
-            mini_sample = (vector[i * size: (i + 1) * size] for vector in [states, actions, nexstates, rewards, dones])
-            self.model_network.update_weights(mini_sample, self.gamma, self.target_network)
+            self.model_network.update_weights(self.replayMemory.get_sample(), self.gamma, self.target_network)
+        self.double_q_counter += 1
+
+        if self.double_q_interval == 0:
+            return
+        if self.double_q_counter % self.double_q_interval == 0:
+            self.update_target_network()
 
     def update_target_network(self):
         self.target_network.take_weights(self.model_network)
 
     def get_trained_player(self, id_number: int) -> AIPlayer:
-        return AIPlayer(id_number, self.boardsize, self.model_network)
+        trained_network = Network(self.boardsize, self.model_network.hidden,
+                                  self.model_network.only_valid_actions, self.model_network.softmax)
+        trained_network.take_weights(self.model_network)
+        return AIPlayer(id_number, self.boardsize, trained_network)
 
     def score_value(self):
-        return (self.score - self.otherPlayer.score) / self.boardsize ** 2
+        return self.score / self.boardsize ** 2
 
     def rotate(self, state, next_state, action):
         left_rotation = [6, 13, 20,

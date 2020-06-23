@@ -6,7 +6,7 @@ from IPython import display
 
 class Network:
     device: torch.device
-    inputDimension: int  # dimensions
+    inputDimension: int
     hidden: int
     network: torch.nn.Sequential
     only_valid_actions: bool
@@ -56,7 +56,7 @@ class Network:
 
         if self.only_valid_actions:
             while state[action] == 1:
-                Q_values[action] = torch.min(Q_values).item() - 10
+                Q_values[action] = torch.min(Q_values).item() - 100
                 action = self.sample_action(Q_values)
 
         return action
@@ -66,9 +66,8 @@ class Network:
 
         states, actions, nextStates, rewards, dones = batch
 
-        self.loss = 0
-        if sum(dones) > 0:
-            pass
+        # if sum(dones) > 0:
+        #    pass
 
         X = torch.tensor([el.tolist() for el in states]).to(self.device).\
             reshape(-1, self.inputDimension)
@@ -78,8 +77,7 @@ class Network:
         rewards = torch.tensor(rewards).to(self.device)
         dones = torch.tensor(dones, dtype=int).to(self.device)
 
-        curr_Q = self.network(X).gather(1, actions.unsqueeze(1)).to(self.device)
-        curr_Q = curr_Q.squeeze(1)
+        curr_Q = self.network(X).gather(1, actions.unsqueeze(1)).to(self.device).squeeze(1)
 
         with torch.no_grad():
             next_Q = target_network.network(X_next).to(self.device)

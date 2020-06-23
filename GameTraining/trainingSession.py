@@ -38,7 +38,7 @@ def network_experience(game: GameTraining, num_games: int, get_wins: bool = Fals
     if get_wins: print("win rate  ", sum(wins) / len(wins))
 
 
-def training_cycle(game: GameTraining, update_target_every, num_games: int):
+def training_cycle(game: GameTraining, num_games: int):
     losses = []
     win_rate = []
     losses_means = []
@@ -53,8 +53,6 @@ def training_cycle(game: GameTraining, update_target_every, num_games: int):
         game.reset()
         #if i % 10 == 0:
         #    print(i, trainer.model_network.loss)
-        if i % update_target_every == 0:
-            trainer.target_network.take_weights(trainer.model_network)
         if i % interval == 0:
             #print("time: ", str(int((time() - t) // 60)) + "min " + str(int(((time() - t) % 60))) + "s"
             #      , "eps: ", trainer.eps_greedy_value, "    iter: ", i)
@@ -79,7 +77,7 @@ def training_cycle(game: GameTraining, update_target_every, num_games: int):
         csv_writer.writerow(win_rate)
 
 
-SAMPLE_SIZE = 1024 * 5
+SAMPLE_SIZE = 3 #1024 * 5
 CAPACITY = 1_000_000
 
 HIDDEN = 50
@@ -94,16 +92,15 @@ only_valid_moves = True
 EPS_GREEDY_VALUE = 1.
 EPS_MIN: float = 0.01
 SOFTMAX = False
-NUM_GAMES = 50_000
+NUM_GAMES = 30 #50_000
 DECAY: float = 0.001
-DOUBLE_Q_LEARNING: bool = True
 UPDATE_TARGET_EVERY = 20
 
 boardsize = 3
 
 trainer = AITrainer(2, boardsize, HIDDEN, REWARD_SCORE, REWARD_INVALID_SCORE, REWARD_WIN, REWARD_LOSE,
                     only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, NUM_GAMES, EPS_MIN, DECAY,
-                    fixed_batch=FIXED_BATCH, softmax=SOFTMAX, double_Q_learning=DOUBLE_Q_LEARNING)
+                    fixed_batch=FIXED_BATCH, softmax=SOFTMAX, double_q_interval=UPDATE_TARGET_EVERY)
 
 players = [RandomPlayer(1, boardsize), trainer]
 trainer.otherPlayer = players[0]
@@ -111,9 +108,11 @@ trainer.otherPlayer = players[0]
 game = GameTraining(players, boardsize)
 
 tt = time()
-training_cycle(game, UPDATE_TARGET_EVERY, NUM_GAMES)
+training_cycle(game, NUM_GAMES)
+trained_player = trainer.get_trained_player(1)
+
 print("global time: ", str(int((time() - tt) // 60)) + "min " + str(int(((time() - tt) % 60))) + "s")
 
 play_test(players[0], trainer, 1_000)
 
-trainer.model_network.save_weights("pesiSimoneVuoleRewardBinaria")
+trainer.model_network.save_weights("pesi_rete_allenata")
