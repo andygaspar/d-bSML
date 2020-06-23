@@ -111,7 +111,7 @@ class AITrainer(Player):
             st, nx_st, act = self.rotate(st, nx_st, act)
             self.store_in_memory(st, nx_st, act, done)
 
-            st_ref, nx_st_ref, act_ref = self.rotate(st, nx_st, act)
+            st_ref, nx_st_ref, act_ref = self.reflect(st, nx_st, act)
             self.store_in_memory(st_ref, nx_st_ref, act_ref, done)
 
         st, nx_st, act = self.reflect(self.state, nextState, self.action)
@@ -225,3 +225,5 @@ class AITrainer(Player):
                 orizontal += "  ** "
             k += 1
         print(orizontal, "\n\n")
+
+# find value -> np.nonzero(array == value)
