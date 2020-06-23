@@ -1,3 +1,4 @@
+from GameTraining.Gym.StateMultiplier import StateMultiplier
 from Players.AIPlayer import AIPlayer
 from Players.player import Player
 from GameTraining.Gym.network import Network
@@ -34,7 +35,7 @@ class AITrainer(Player):
 
     def __init__(self, id_number: int, boardsize: int, hidden: int, rewardScored: float, rewardInvalidMove: float,
                  rewardWinning: float, rewardLosing: float, only_valid: bool, sample_size: int, capacity: int,
-                 gamma: float, numgames: int, eps_min: float, decay: float, fixed_batch: bool = False,
+                 gamma: float, numgames: int, eps_min: float, eps_decay: float, fixed_batch: bool = False,
                  softmax: bool = False, double_q_interval: int = 0):
 
         super().__init__(id_number, boardsize)
@@ -56,7 +57,7 @@ class AITrainer(Player):
         self.fixed_batch = fixed_batch
         self.eps_greedy_value = 1.
         self.eps_min = eps_min
-        self.decay = decay
+        self.eps_decay = eps_decay
         self.softmax = softmax
         self.numgames = numgames
         self.double_q_interval = double_q_interval
@@ -81,7 +82,7 @@ class AITrainer(Player):
             return self.get_random_valid_move(state)
 
     def update_eps(self, iteration: int):
-        self.eps_greedy_value = self.eps_min + (1 - self.eps_min) * np.exp(- self.decay * iteration)
+        self.eps_greedy_value = self.eps_min + (1 - self.eps_min) * np.exp(- self.eps_decay * iteration)
 
     def no_score_move(self):
         self.rewardScoresInRow = 0
@@ -107,13 +108,13 @@ class AITrainer(Player):
         nx_st = nextState.copy()
         act = self.action
         for i in range(3):
-            st, nx_st, act = self.rotate(st, nx_st, act)
+            st, nx_st, act = StateMultiplier.rotate(st, nx_st, act)
             self.store_in_memory(st, nx_st, act, done)
 
-            st_ref, nx_st_ref, act_ref = self.reflect(st, nx_st, act)
+            st_ref, nx_st_ref, act_ref = StateMultiplier.reflect(st, nx_st, act)
             self.store_in_memory(st_ref, nx_st_ref, act_ref, done)
 
-        st, nx_st, act = self.reflect(self.state, nextState, self.action)
+        st, nx_st, act = StateMultiplier.reflect(self.state, nextState, self.action)
         self.store_in_memory(st, nx_st, act, done)
         self.current_reward = 0
 
@@ -141,44 +142,7 @@ class AITrainer(Player):
     def score_value(self):
         return self.score / self.boardsize ** 2
 
-    def rotate(self, state, next_state, action):
-        left_rotation = [6, 13, 20,
-                          2, 9, 16, 23,
-                          5, 12, 19,
-                          1, 8, 15, 22,
-                          4, 11, 18,
-                          0, 7, 14, 21,
-                          3, 10, 17]
-        rotated_state = np.array([state[i] for i in left_rotation])
-        # self.print_board(state)
-        # self.print_board(rotated_state)
-        rotated_action = self.find_index(left_rotation, action)
-        # print(action, rotated_action)
-        rotated_next_state = np.array([next_state[i] for i in left_rotation])
-        # self.print_board(next_state)
-        # self.print_board(rotated_next_state)
-        return rotated_state, rotated_next_state, rotated_action
-
-    def reflect(self, state, next_state, action):
-        reflection = [21, 22, 23,
-                         17, 18, 19, 20,
-                         14, 15, 16,
-                         10, 11, 12, 13,
-                         7, 8, 9,
-                         3, 4, 5, 6,
-                         0, 1, 2]
-        reflected_state = np.array([state[i] for i in reflection])
-        # self.print_board(state)
-        # self.print_board(reflected_state)
-        reflected_action = self.find_index(reflection, action)
-        # print(action, reflected_action)
-        reflected_next_state = np.array([next_state[i] for i in reflection])
-        # self.print_board(next_state)
-        # self.print_board(reflected_next_state)
-        return reflected_state, reflected_next_state, reflected_action
-
-
-    def store_in_memory(self, state, nextState, action, done):
+    def store_in_memory(self, state: np.array, nextState: np.array, action: int, done: bool):
         if self.fixed_batch:
             if self.replayMemory.size < self.replayMemory.sampleSize:
                 self.replayMemory.add_record(self.state_with_score(state), action,
@@ -188,24 +152,13 @@ class AITrainer(Player):
                                          self.next_state_with_score(nextState), self.current_reward, done)
         self.current_reward = 0
 
-    def state_with_score(self, state):
+    def state_with_score(self, state: np.array):
         return np.append(state, self.stateScore)
 
-    def next_state_with_score(self, nextState):
+    def next_state_with_score(self, nextState: np.array):
         return np.append(nextState, self.score_value())
 
-    def find_index(self, vect, action):
-        ciccio = np.flatnonzero(np.array(vect) == int(action))[0]
-        return ciccio
-        # find value -> np.flatnonzero(array == value)
-        #for i in range(len(vect)):
-        #    if vect[i] == action:
-        #        return i
-
-    def __str__(self):
-        return "AI trainer player"
-
-    def print_board(self, vect) -> str:
+    def print_board(self, vect: np.array) -> str:
         k = 0
         N = self.boardsize
         for i in range(N):
@@ -237,3 +190,6 @@ class AITrainer(Player):
                 orizontal += "  ** "
             k += 1
         print(orizontal, "\n\n")
+
+    def __str__(self):
+        return "AI trainer player"

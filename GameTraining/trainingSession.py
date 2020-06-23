@@ -89,17 +89,16 @@ REWARD_WIN = 1
 REWARD_LOSE = -1
 FIXED_BATCH = False
 only_valid_moves = True
-EPS_GREEDY_VALUE = 1.
 EPS_MIN: float = 0.01
 SOFTMAX = False
 NUM_GAMES = 30 #50_000
-DECAY: float = 0.001
+EPS_DECAY: float = 0.001
 UPDATE_TARGET_EVERY = 20
 
 boardsize = 3
 
 trainer = AITrainer(2, boardsize, HIDDEN, REWARD_SCORE, REWARD_INVALID_SCORE, REWARD_WIN, REWARD_LOSE,
-                    only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, NUM_GAMES, EPS_MIN, DECAY,
+                    only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, NUM_GAMES, EPS_MIN, EPS_DECAY,
                     fixed_batch=FIXED_BATCH, softmax=SOFTMAX, double_q_interval=UPDATE_TARGET_EVERY)
 
 players = [RandomPlayer(1, boardsize), trainer]
