@@ -63,3 +63,5 @@ class Board:
                 orizontal += "  ** "
             k += 1
         print(orizontal, "\n\n")
+
+
