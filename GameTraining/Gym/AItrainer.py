@@ -121,7 +121,11 @@ class AITrainer(Player):
     def train_model_network(self):
         if self.replayMemory.size < self.replayMemory.sampleSize:
             return
-        self.model_network.update_weights(self.replayMemory.get_sample(), self.gamma, self.target_network)
+        states, actions, nexstates, rewards, dones = self.replayMemory.get_sample()
+        size = len(states) // 5
+        for i in range(5):
+            mini_sample = (vector[i * size: (i + 1) * size] for vector in [states, actions, nexstates, rewards, dones])
+            self.model_network.update_weights(mini_sample, self.gamma, self.target_network)
 
     def update_target_network(self):
         self.target_network.take_weights(self.model_network)
@@ -186,9 +190,12 @@ class AITrainer(Player):
         return np.append(nextState, self.score_value())
 
     def find_index(self, vect, action):
-        for i in range(len(vect)):
-            if vect[i] == action:
-                return i
+        ciccio = np.flatnonzero(np.array(vect) == int(action))[0]
+        return ciccio
+        # find value -> np.flatnonzero(array == value)
+        #for i in range(len(vect)):
+        #    if vect[i] == action:
+        #        return i
 
     def __str__(self):
         return "AI trainer player"
@@ -225,5 +232,3 @@ class AITrainer(Player):
                 orizontal += "  ** "
             k += 1
         print(orizontal, "\n\n")
-
-# find value -> np.nonzero(array == value)

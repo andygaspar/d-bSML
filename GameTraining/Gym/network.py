@@ -14,7 +14,7 @@ class Network:
 
     def __init__(self, boardsize: int, hidden: int, ony_valid_actions: bool, softmax: bool):
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.loss = [0]
+        self.loss = 0
         self.inputDimension = (2 * boardsize + 2) * boardsize + 1
         self.outputDimension = (2 * boardsize + 2) * boardsize
         self.hidden = hidden
@@ -32,8 +32,8 @@ class Network:
             nn.Linear(self.hidden, self.outputDimension),
         )
         self.network.to(self.device)
-        torch.cuda.current_device()
-        print(torch.cuda.is_available())
+        #torch.cuda.current_device()
+        #print(torch.cuda.is_available())
         self.only_valid_actions = ony_valid_actions
         self.softmax = softmax
         self.optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
@@ -65,38 +65,34 @@ class Network:
         criterion = torch.nn.MSELoss()
 
         states, actions, nextStates, rewards, dones = batch
-        minibatch_number = 5
-        if sum(dones)>0:
-            pass
-        size = int(len(states) / minibatch_number)
-        self.loss = []
+
+        self.loss = 0
         if sum(dones) > 0:
             pass
-        for i in range(minibatch_number):
 
-            X = torch.tensor([el.tolist() for el in states[i * size:(i + 1) * size]]).to(self.device).\
-                reshape(-1, self.inputDimension)
-            X_next = torch.tensor([el.tolist() for el in nextStates[i * size:(i + 1) * size]]).to(self.device)\
-                .reshape(-1, self.inputDimension)
-            actions_new = torch.tensor(actions[i * size:(i + 1) * size]).to(self.device)
-            rewards_new = torch.tensor(rewards[i * size:(i + 1) * size]).to(self.device)
-            dones_new = torch.tensor(dones[i * size:(i + 1) * size], dtype=int).to(self.device)
+        X = torch.tensor([el.tolist() for el in states]).to(self.device).\
+            reshape(-1, self.inputDimension)
+        X_next = torch.tensor([el.tolist() for el in nextStates]).to(self.device)\
+            .reshape(-1, self.inputDimension)
+        actions = torch.tensor(actions).to(self.device)
+        rewards = torch.tensor(rewards).to(self.device)
+        dones = torch.tensor(dones, dtype=int).to(self.device)
 
-            curr_Q = self.network(X).gather(1, actions_new.unsqueeze(1)).to(self.device)
-            curr_Q = curr_Q.squeeze(1)
+        curr_Q = self.network(X).gather(1, actions.unsqueeze(1)).to(self.device)
+        curr_Q = curr_Q.squeeze(1)
 
-            with torch.no_grad():
-                next_Q = target_network.network(X_next).to(self.device)
-                max_next_Q = torch.max(next_Q, 1)[0]
-                expected_Q = (rewards_new + (1 - dones_new) * gamma * max_next_Q).to(self.device)
+        with torch.no_grad():
+            next_Q = target_network.network(X_next).to(self.device)
+            max_next_Q = torch.max(next_Q, 1)[0]
+            expected_Q = (rewards + (1 - dones) * gamma * max_next_Q).to(self.device)
 
-            loss = criterion(curr_Q, expected_Q.detach())
-            self.loss.append(loss.item())
-            display.clear_output(wait=True)
-            self.optimizer.zero_grad()
-            loss.backward()
-            # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
-            self.optimizer.step()
+        loss = criterion(curr_Q, expected_Q.detach())
+        self.loss = loss.item()
+        display.clear_output(wait=True)
+        self.optimizer.zero_grad()
+        loss.backward()
+        # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
+        self.optimizer.step()
 
     def take_weights(self, model_network):
         self.network.load_state_dict(model_network.network.state_dict())
