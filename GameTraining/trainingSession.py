@@ -77,10 +77,10 @@ def training_cycle(game: GameTraining, num_games: int):
         csv_writer.writerow(win_rate)
 
 
-SAMPLE_SIZE = 3 #1024 * 5
+SAMPLE_SIZE = 100 #1024 * 5
 CAPACITY = 1_000_000
 
-HIDDEN = 50
+HIDDEN = 30
 GAMMA = 1.
 
 REWARD_SCORE: float = 0
@@ -91,7 +91,7 @@ FIXED_BATCH = False
 only_valid_moves = True
 EPS_MIN: float = 0.01
 SOFTMAX = False
-NUM_GAMES = 30 #50_000
+NUM_GAMES = 5_000 #50_000
 EPS_DECAY: float = 0.001
 UPDATE_TARGET_EVERY = 20
 
