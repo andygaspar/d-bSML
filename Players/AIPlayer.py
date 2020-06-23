@@ -13,7 +13,7 @@ class AIPlayer(Player):
         self.score = 0
         self.invalid = False
         self.network = network
-        #self.network.network.eval()
+        self.network.network.eval()
 
     def get_random_valid_move(self, state: np.array) -> int:
         self.invalid = False
