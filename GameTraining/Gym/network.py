@@ -21,9 +21,9 @@ class Network:
         self.network = nn.Sequential(
             nn.Linear(self.inputDimension, 2 * self.hidden),
             nn.ReLU(),
-            # nn.Linear(self.inputDimension * 2, self.inputDimension * 3),
-            # nn.ReLU(),
-            # # nn.Linear(self.inputDimension * 3, self.inputDimension * 2),
+            nn.Linear(self.hidden * 2, self.hidden * 3),
+            nn.ReLU(),
+            nn.Linear(self.hidden * 3, self.hidden * 2),
             # # nn.ReLU(),
             # # nn.Linear(self.inputDimension * 2, self.inputDimension),
             # nn.ReLU(),
@@ -86,7 +86,6 @@ class Network:
 
         loss = criterion(curr_Q, expected_Q.detach())
         self.loss = loss.item()
-        display.clear_output(wait=True)
         self.optimizer.zero_grad()
         loss.backward()
         # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
