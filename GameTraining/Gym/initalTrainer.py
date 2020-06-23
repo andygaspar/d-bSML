@@ -11,7 +11,7 @@ class InitialTrainer(AITrainer):
                  fixed_batch: bool = False, eps_greedy_value: float = 1., softmax: bool = False):
         super().__init__(id_number, boardsize, hidden, rewardNoScore, rewardScored, rewardOpponentScored,
                          rewardInvalidMove, rewardScoresInRow, rewardWinning, rewardLosing, only_valid,
-                         sample_size, capacity, gamma, numgames, eps_min, decay, fixed_batch, eps_greedy_value, softmax)
+                         sample_size, capacity, gamma, numgames, eps_min, decay)#, fixed_batch, eps_greedy_value, softmax)
 
     def get_move(self, state: np.array) -> int:
         self.state = state.copy()

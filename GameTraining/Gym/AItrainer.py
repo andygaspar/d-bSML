@@ -59,6 +59,8 @@ class AITrainer(Player):
         self.numgames = numgames
         self.double_Q_learning = double_Q_learning
 
+        self.otherPlayer = None
+
     def get_random_valid_move(self, state: np.array) -> int:
         self.invalid = False
         validMoves = np.flatnonzero(state == 0)
@@ -67,9 +69,10 @@ class AITrainer(Player):
 
     def get_move(self, state: np.array) -> int:
         self.state = state.copy()
+        self.state = np.append(self.state, self.score_value())
         if np.random.rand() > self.eps_greedy_value:
             if not self.invalid:
-                self.action = self.model_network.get_action(state)
+                self.action = self.model_network.get_action(self.state)
                 return self.action
             else:
                 return self.get_random_valid_move(state)
@@ -98,6 +101,7 @@ class AITrainer(Player):
             self.current_reward += self.rewardLosing
 
     def add_record(self, nextState: np.array, done: bool):
+        nextState = np.append(nextState, self.score_value())
         if self.fixed_batch:
             if self.replayMemory.size < self.replayMemory.sampleSize:
                 self.replayMemory.add_record(self.state, self.action, nextState.copy(), self.current_reward, done)
@@ -115,6 +119,9 @@ class AITrainer(Player):
 
     def get_trained_player(self, id_number: int) -> AIPlayer:
         return AIPlayer(id_number, self.boardsize, self.model_network)
+
+    def score_value(self):
+        return (self.score - self.otherPlayer.score) / self.boardsize ** 2
 
     def __str__(self):
         return "AI trainer player"

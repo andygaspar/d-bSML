@@ -17,6 +17,7 @@ class AIPlayer(Player):
         self.invalid = False
         self.network = network
         self.network.network#.eval()
+        self.otherPlayer = None
 
     def get_random_valid_move(self, state: np.array) -> int:
         self.invalid = False
@@ -25,7 +26,7 @@ class AIPlayer(Player):
 
     def get_move(self, state: np.array) -> int:
         if not self.invalid:
-            return self.network.get_action(state)
+            return self.network.get_action(np.append(state, self.score_value()))
         else:
             #or RaiseError?
             return self.get_random_valid_move(state)
@@ -35,6 +36,9 @@ class AIPlayer(Player):
 
     def invalidMove(self):
         self.invalid = True
+
+    def score_value(self):
+        return (self.score - self.otherPlayer.score) / self.boardsize ** 2
 
     def __str__(self):
         return "AI player"

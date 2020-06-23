@@ -44,6 +44,7 @@ class GameTraining:
             if newNumBoxes - self.numBoxes == 0:
                 if turn > 0:
                     currentPlayer.no_score_move()
+                    score = otherPlayer.score-currentPlayer.score
                     otherPlayer.add_record(self.board.vectorBoard, False)
                     #otherPlayer.add_record(self.board.vectorBoard, np.count_nonzero(self.board.vectorBoard) == len(self.board.vectorBoard))
                     if train:

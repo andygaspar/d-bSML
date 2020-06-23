@@ -1,7 +1,7 @@
 from typing import List
 import numpy as np
 from csv import writer
-
+# è segnato 9 per la divisione nell'append score, se si gioca a board non 3x3 va cambiato
 
 class ReplayMemory:
     size: int
@@ -41,7 +41,7 @@ class ReplayMemory:
     def get_sample(self):
         random_idx = np.random.choice(range(self.size), size=self.sampleSize, replace=False).astype(int)
         return [self.states[i] for i in random_idx], [self.actions[i] for i in random_idx], \
-               [self.nextStates[i] for i in random_idx], [self.rewards[i] for i in random_idx], \
+               [self.nextStates[i] for i in random_idx], [self.rewards[i] for i in random_idx],\
                [self.dones[i] for i in random_idx]
 
     def export_memory(self):

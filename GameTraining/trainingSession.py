@@ -9,6 +9,7 @@ import numpy as np
 
 def play_test(random_player, trained, num_games):
     AI = AIPlayer(2, 3, trained.model_network)
+    AI.otherPlayer = random_player
     test_players = [random_player, AI]
     test_match = Game(test_players, boardsize)
     wins = 0
@@ -78,7 +79,7 @@ def training_cycle(game: GameTraining, update_target_every, num_games: int):
         csv_writer.writerow(win_rate)
 
 
-SAMPLE_SIZE = 1_024 * 5
+SAMPLE_SIZE = 1024 * 5
 CAPACITY = 1_000_000
 
 HIDDEN = 50
@@ -93,7 +94,7 @@ only_valid_moves = True
 EPS_GREEDY_VALUE = 1.
 EPS_MIN: float = 0.01
 SOFTMAX = False
-NUM_GAMES = 30_000
+NUM_GAMES = 50_000
 DECAY: float = 0.001
 DOUBLE_Q_LEARNING: bool = True
 UPDATE_TARGET_EVERY = 20
@@ -105,6 +106,7 @@ trainer = AITrainer(2, boardsize, HIDDEN, REWARD_SCORE, REWARD_INVALID_SCORE, RE
                     fixed_batch=FIXED_BATCH, softmax=SOFTMAX, double_Q_learning=DOUBLE_Q_LEARNING)
 
 players = [RandomPlayer(1, boardsize), trainer]
+trainer.otherPlayer = players[0]
 #trainer.replayMemory.import_memory("Gym/")
 game = GameTraining(players, boardsize)
 
