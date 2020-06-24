@@ -37,7 +37,6 @@ class AITrainer(Player):
                  rewardWinning: float, rewardLosing: float, only_valid: bool, sample_size: int, capacity: int,
                  gamma: float, numgames: int, eps_min: float, eps_decay: float, fixed_batch: bool = False,
                  softmax: bool = False, double_q_interval: int = 0):
-
         super().__init__(id_number, boardsize)
         self.rewardNoScore = 0
         self.rewardInvalidMove = rewardInvalidMove

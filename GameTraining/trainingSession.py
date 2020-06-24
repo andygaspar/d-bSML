@@ -7,7 +7,7 @@ from GameTraining.gameTraining import GameTraining
 from Game.game import Game
 from time import time
 import numpy as np
-
+from Players.greedyPlayerWithMemory import GreedyPlayerWithMemory
 
 def play_test(tester_player, trained, num_games):
     AI = AIPlayer(2, 3, trained.model_network)
@@ -90,7 +90,7 @@ SAMPLE_SIZE = 1500 #1024 * 5
 CAPACITY = 1_000_000
 
 HIDDEN = 30
-GAMMA = 0.5
+GAMMA = 1
 
 REWARD_SCORE: float = 0.5
 REWARD_INVALID_SCORE: float = -5
@@ -110,13 +110,18 @@ boardsize = 3
 trainer = AITrainer(2, boardsize, HIDDEN, REWARD_SCORE, REWARD_INVALID_SCORE, REWARD_WIN, REWARD_LOSE,
                     only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, NUM_GAMES, EPS_MIN, EPS_DECAY,
                     fixed_batch=FIXED_BATCH, softmax=SOFTMAX, double_q_interval=UPDATE_TARGET_EVERY)
+greedy_memory = GreedyPlayerWithMemory(2, boardsize, HIDDEN, REWARD_SCORE, REWARD_INVALID_SCORE, REWARD_WIN, REWARD_LOSE,
+                    only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, NUM_GAMES, EPS_MIN, EPS_DECAY,
+                    fixed_batch=FIXED_BATCH, softmax=SOFTMAX, double_q_interval=UPDATE_TARGET_EVERY)
+
+greedy_memory.replayMemory = trainer.replayMemory
 
 # trainer.model_network.load_weights("pesi_rete_allenata_7.pt")
 # trainer.target_network.load_weights("pesi_rete_allenata_7.pt")
-play_test(StupidPlayer(1, boardsize, 0), trainer, 100)
+play_test(greedy_memory, trainer, 100)
 # play_test(StupidPlayer(1, boardsize, 0.1), trainer, 500)
 # play_test(StupidPlayer(1, boardsize, 0.2), trainer, 500)
-players = [StupidPlayer(1, boardsize, STUPID_PLAYER_RANDOMNESS), trainer]
+players = [greedy_memory, trainer]
 #trainer.otherPlayer = players[0]
 #trainer.replayMemory.import_memory("Gym/")
 game = GameTraining(players, boardsize)
