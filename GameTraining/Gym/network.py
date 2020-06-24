@@ -19,24 +19,18 @@ class Network:
         self.outputDimension = (2 * boardsize + 2) * boardsize
         self.hidden = hidden
         self.network = nn.Sequential(
-            nn.Linear(self.inputDimension, 2 * self.hidden),
-            nn.ReLU(),
-            nn.Linear(self.hidden * 2, self.hidden * 3),
+            nn.Linear(self.inputDimension, 3 * self.hidden),
             nn.ReLU(),
             nn.Linear(self.hidden * 3, self.hidden * 2),
-            # # nn.ReLU(),
-            # # nn.Linear(self.inputDimension * 2, self.inputDimension),
-            # nn.ReLU(),
-            nn.Linear(self.hidden * 2, self.hidden),
             nn.ReLU(),
-            nn.Linear(self.hidden, self.outputDimension),
+            nn.Linear(self.hidden * 2, self.outputDimension),
         )
         self.network.to(self.device)
-        #torch.cuda.current_device()
-        #print(torch.cuda.is_available())
+        torch.cuda.current_device()
+        print(torch.cuda.is_available())
         self.only_valid_actions = ony_valid_actions
         self.softmax = softmax
-        self.optimizer = optim.Adam(self.network.parameters(), lr=1e-5, weight_decay=1e-5)
+        self.optimizer = optim.Adam(self.network.parameters(), lr=1e-7, weight_decay=1e-5)
         # self.optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
 
     def sample_action(self, Q_values: torch.tensor) -> int:
@@ -88,11 +82,14 @@ class Network:
         self.loss = loss.item()
         self.optimizer.zero_grad()
         loss.backward()
-        # torch.nn.utils.clip_grad_norm_(self.network.parameters(), 10)
+        #torch.nn.utils.clip_grad_norm_(self.network.parameters(), 1)
         self.optimizer.step()
 
     def take_weights(self, model_network):
         self.network.load_state_dict(model_network.network.state_dict())
+
+    def load_weights(self, file):
+        self.network.load_state_dict(torch.load(file))
 
     def save_weights(self, filename: str):
         torch.save(self.network.state_dict(), filename + '.pt')
