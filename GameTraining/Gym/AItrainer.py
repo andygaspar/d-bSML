@@ -49,7 +49,7 @@ class AITrainer(Player):
         self.state = None
         self.stateScore = None
         self.action = None
-        self.invalid = False
+        self.invalid = True
         self.replayMemory = ReplayMemory(sample_size, capacity)
         self.current_reward = 0
         self.score = 0
@@ -72,14 +72,16 @@ class AITrainer(Player):
     def get_move(self, state: np.array) -> int:
         self.state = state.copy()
         self.stateScore = self.score_value()
-        if np.random.rand() > self.eps_greedy_value:
-            if not self.invalid:
-                self.action = self.model_network.get_action(self.state_with_score(self.state))
-                return self.action
-            else:
-                return self.get_random_valid_move(state)
-        else:
-            return self.get_random_valid_move(state)
+        self.action = self.model_network.get_action(self.state_with_score(self.state))
+        return self.action
+        # if np.random.rand() > self.eps_greedy_value:
+        #     if not self.invalid:
+        #         self.action = self.model_network.get_action(self.state_with_score(self.state))
+        #         return self.action
+        #     else:
+        #         return self.get_random_valid_move(state)
+        # else:
+        #     return self.get_random_valid_move(state)
 
     def update_eps(self, iteration: int):
         self.eps_greedy_value = self.eps_min + (1 - self.eps_min) * np.exp(- self.eps_decay * iteration)
@@ -96,8 +98,9 @@ class AITrainer(Player):
         self.current_reward -= newPoints * self.rewardScored
 
     def invalidMove(self):
-        self.invalid = True
-        self.current_reward += self.rewardInvalidMove
+        self.replayMemory.add_record(self.state_with_score(self.state), self.action, np.ones(len(self.state)+1) * 5,
+                                     self.rewardInvalidMove, done=True)
+        self.train_model_network()
 
     def endGameReward(self, win: bool):
         if win:
@@ -124,7 +127,7 @@ class AITrainer(Player):
     def train_model_network(self):
         if self.replayMemory.size < self.replayMemory.sampleSize:
             return
-        for i in range(5):
+        for i in range(2):
             self.model_network.update_weights(self.replayMemory.get_sample(), self.gamma, self.target_network)
         self.double_q_counter += 1
 

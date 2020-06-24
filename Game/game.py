@@ -20,6 +20,7 @@ class Game:
         PlayerTurn = 0
         N = self.board.size
         newNumBoxes = 0
+        invalids = 0
 
         # self.board.print_board()
 
@@ -29,6 +30,7 @@ class Game:
 
             while not self.is_valid(move):
                 currentPlayer.invalidMove()
+                invalids += 1
                 move = currentPlayer.get_move(self.board.vectorBoard)
                 # print("Invalid Move")
 
@@ -47,8 +49,7 @@ class Game:
                 self.numBoxes = newNumBoxes
 
             #self.board.print_board()
-
-        # print("Players score: " + str([p.score for p in self.players]))
+        return invalids # print("Players score: " + str([p.score for p in self.players]))
 
     def reset(self):
         self.board = Board(self.boardsize)

@@ -32,9 +32,9 @@ class GameTraining:
 
             action = currentPlayer.get_move(self.board.vectorBoard)
 
-            while not self.is_valid(action):
+            if not self.is_valid(action):
                 currentPlayer.invalidMove()
-                action = currentPlayer.get_move(self.board.vectorBoard)
+                return 1
 
             self.board.set_board(action)
 
@@ -65,6 +65,7 @@ class GameTraining:
             currentPlayer.train_model_network()
         if train:
             otherPlayer.train_model_network()
+        return 0
 
     def reset(self):
         self.board = Board(self.boardsize)

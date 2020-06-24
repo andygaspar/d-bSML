@@ -19,11 +19,17 @@ class Network:
         self.outputDimension = (2 * boardsize + 2) * boardsize
         self.hidden = hidden
         self.network = nn.Sequential(
-            nn.Linear(self.inputDimension, 3 * self.hidden),
-            nn.ReLU(),
-            nn.Linear(self.hidden * 3, self.hidden * 2),
-            nn.ReLU(),
-            nn.Linear(self.hidden * 2, self.outputDimension),
+            nn.Linear(self.inputDimension, 2*self.inputDimension),
+            nn.LeakyReLU(),
+            nn.Linear(2*self.inputDimension, 2*self.inputDimension),
+            nn.LeakyReLU(),
+            nn.Linear(2*self.inputDimension, 2*self.inputDimension),
+            nn.LeakyReLU(),
+            nn.Linear(2 * self.inputDimension, 2 * self.inputDimension),
+            nn.LeakyReLU(),
+            nn.Linear(2 * self.inputDimension, 2 * self.inputDimension),
+            nn.LeakyReLU(),
+            nn.Linear(2 * self.inputDimension,  self.outputDimension),
         )
         self.network.to(self.device)
         torch.cuda.current_device()
@@ -48,10 +54,10 @@ class Network:
             Q_values = torch.flatten(self.network(X)).to(self.device)
         action = self.sample_action(Q_values)
 
-        if self.only_valid_actions:
-            while state[action] == 1:
-                Q_values[action] = torch.min(Q_values).item() - 100
-                action = self.sample_action(Q_values)
+        # if self.only_valid_actions:
+        #     while state[action] == 1:
+        #         Q_values[action] = torch.min(Q_values).item() - 100
+        #         action = self.sample_action(Q_values)
 
         return action
 
@@ -70,20 +76,20 @@ class Network:
         actions = torch.tensor(actions).to(self.device)
         rewards = torch.tensor(rewards).to(self.device)
         dones = torch.tensor(dones, dtype=int).to(self.device)
+        for i in range(5):
+            curr_Q = self.network(X).gather(1, actions.unsqueeze(1)).to(self.device).squeeze(1)
 
-        curr_Q = self.network(X).gather(1, actions.unsqueeze(1)).to(self.device).squeeze(1)
+            with torch.no_grad():
+                next_Q = target_network.network(X_next).to(self.device)
+                max_next_Q = torch.max(next_Q, 1)[0]
+                expected_Q = (rewards + (1 - dones) * gamma * max_next_Q).to(self.device)
 
-        with torch.no_grad():
-            next_Q = target_network.network(X_next).to(self.device)
-            max_next_Q = torch.max(next_Q, 1)[0]
-            expected_Q = (rewards + (1 - dones) * gamma * max_next_Q).to(self.device)
-
-        loss = criterion(curr_Q, expected_Q.detach())
-        self.loss = loss.item()
-        self.optimizer.zero_grad()
-        loss.backward()
-        #torch.nn.utils.clip_grad_norm_(self.network.parameters(), 1)
-        self.optimizer.step()
+            loss = criterion(curr_Q, expected_Q.detach())
+            self.loss = loss.item()
+            self.optimizer.zero_grad()
+            loss.backward()
+            #torch.nn.utils.clip_grad_norm_(self.network.parameters(), 1)
+            self.optimizer.step()
 
     def take_weights(self, model_network):
         self.network.load_state_dict(model_network.network.state_dict())
