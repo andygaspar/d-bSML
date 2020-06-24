@@ -30,7 +30,7 @@ class Network:
         print(torch.cuda.is_available())
         self.only_valid_actions = ony_valid_actions
         self.softmax = softmax
-        self.optimizer = optim.Adam(self.network.parameters(), lr=1e-7, weight_decay=1e-5)
+        self.optimizer = optim.Adam(self.network.parameters(), lr=1e-4, weight_decay=1e-5)
         # self.optimizer = optim.SGD(self.network.parameters(), lr=1e-2, momentum=0.9)
 
     def sample_action(self, Q_values: torch.tensor) -> int:

@@ -70,11 +70,11 @@ def training_cycle(game: GameTraining, num_games: int):
         csv_writer.writerow(win_rate)
 
 
-SAMPLE_SIZE = 100 #1024 * 5
+SAMPLE_SIZE = 50 #1024 * 5
 CAPACITY = 1_000_000
 
 HIDDEN = 30
-GAMMA = 1.
+GAMMA = 0
 
 REWARD_SCORE: float = 0.5
 REWARD_INVALID_SCORE: float = 0
@@ -87,7 +87,7 @@ SOFTMAX = False
 NUM_GAMES = 50_000 #50_000
 EPS_DECAY: float = 0.001
 UPDATE_TARGET_EVERY = 20
-STUPID_PLAYER_RANDOMNESS = 0.3
+STUPID_PLAYER_RANDOMNESS = 1
 
 boardsize = 3
 
@@ -95,11 +95,11 @@ trainer = AITrainer(2, boardsize, HIDDEN, REWARD_SCORE, REWARD_INVALID_SCORE, RE
                     only_valid_moves, SAMPLE_SIZE, CAPACITY, GAMMA, NUM_GAMES, EPS_MIN, EPS_DECAY,
                     fixed_batch=FIXED_BATCH, softmax=SOFTMAX, double_q_interval=UPDATE_TARGET_EVERY)
 
-trainer.model_network.load_weights("pesi_rete_allenata_8.pt")
-trainer.target_network.load_weights("pesi_rete_allenata_8.pt")
-play_test(StupidPlayer(1, boardsize, 0), trainer, 1)
-play_test(StupidPlayer(1, boardsize, 0.1), trainer, 500)
-play_test(StupidPlayer(1, boardsize, 0.2), trainer, 500)
+# trainer.model_network.load_weights("pesi_rete_allenata_7.pt")
+# trainer.target_network.load_weights("pesi_rete_allenata_7.pt")
+play_test(StupidPlayer(1, boardsize, 0), trainer, 100)
+# play_test(StupidPlayer(1, boardsize, 0.1), trainer, 500)
+# play_test(StupidPlayer(1, boardsize, 0.2), trainer, 500)
 players = [StupidPlayer(1, boardsize, STUPID_PLAYER_RANDOMNESS), trainer]
 trainer.otherPlayer = players[0]
 #trainer.replayMemory.import_memory("Gym/")
