@@ -1,5 +1,6 @@
 import numpy as np
 from GameTraining.Gym.AItrainer import AITrainer
+from GameTraining.Gym.StateMultiplier import StateMultiplier
 
 
 class GreedyPlayerWithMemory(AITrainer):
@@ -11,6 +12,8 @@ class GreedyPlayerWithMemory(AITrainer):
         super().__init__(id, boardsize, hidden, rewardScored, rewardInvalidMove, rewardWinning, rewardLosing,
                          only_valid, sample_size, capacity, gamma, numgames, eps_min, eps_decay, fixed_batch,
                          softmax, double_q_interval=double_q_interval)
+
+        self.save = False
 
     def get_move(self, board: np.array) -> int:
         self.state = board.copy()
@@ -39,6 +42,23 @@ class GreedyPlayerWithMemory(AITrainer):
         validMoves = np.flatnonzero(board == 0)
         self.action = np.random.choice(validMoves)
         return self.action
+
+    def add_record(self, nextState: np.array, done: bool):
+        if self.save:
+            self.store_in_memory(self.state, nextState, self.action, done)
+            st = self.state.copy()
+            nx_st = nextState.copy()
+            act = self.action
+            for i in range(3):
+                st, nx_st, act = StateMultiplier.rotate(st, nx_st, act)
+                self.store_in_memory(st, nx_st, act, done)
+
+                st_ref, nx_st_ref, act_ref = StateMultiplier.reflect(st, nx_st, act)
+                self.store_in_memory(st_ref, nx_st_ref, act_ref, done)
+
+            st, nx_st, act = StateMultiplier.reflect(self.state, nextState, self.action)
+            self.store_in_memory(st, nx_st, act, done)
+            self.current_reward = 0
 
     def train_model_network(self):
         return

@@ -23,13 +23,13 @@ class Network:
             nn.LeakyReLU(),
             nn.Linear(2*self.inputDimension, 2*self.inputDimension),
             nn.LeakyReLU(),
-            nn.Linear(2*self.inputDimension, 2*self.inputDimension),
-            nn.LeakyReLU(),
-            nn.Linear(2 * self.inputDimension, 2 * self.inputDimension),
-            nn.LeakyReLU(),
-            nn.Linear(2 * self.inputDimension, 2 * self.inputDimension),
-            nn.LeakyReLU(),
-            nn.Linear(2 * self.inputDimension,  self.outputDimension),
+            nn.Linear(2*self.inputDimension, self.outputDimension),
+            # nn.LeakyReLU(),
+            # nn.Linear(2 * self.inputDimension, 2 * self.inputDimension),
+            # nn.LeakyReLU(),
+            # nn.Linear(2 * self.inputDimension, 2 * self.inputDimension),
+            # nn.LeakyReLU(),
+            # nn.Linear(2 * self.inputDimension,  self.outputDimension),
         )
         self.network.to(self.device)
         torch.cuda.current_device()
