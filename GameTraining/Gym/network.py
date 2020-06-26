@@ -76,12 +76,15 @@ class Network:
         actions = torch.tensor(actions).to(self.device)
         rewards = torch.tensor(rewards).to(self.device)
         dones = torch.tensor(dones, dtype=int).to(self.device)
+        if self.only_valid_actions: mask = X_next[:, :-1] == 1
         for i in range(5):
             curr_Q = self.network(X).gather(1, actions.unsqueeze(1)).to(self.device).squeeze(1)
 
             with torch.no_grad():
                 next_Q = target_network.network(X_next).to(self.device)
-                max_next_Q = torch.max(next_Q, 1)[0]
+                if self.only_valid_actions: next_Q[mask] = - 100
+                max_next_Q = torch.max(next_Q, 1)
+                max_next_Q = max_next_Q[0]
                 expected_Q = (rewards + (1 - dones) * gamma * max_next_Q).to(self.device)
 
             loss = criterion(curr_Q, expected_Q.detach())
